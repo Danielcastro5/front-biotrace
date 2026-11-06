@@ -1,3 +1,5 @@
+@import './app/pages/trazabilidad/trazabilidad.styles.css';
+
 :root {
   /* Paleta Oficial: Titanio & Cian Glacial (Swiss Precision & Pharma/Cosmetics) */
   --titanium-950: #090d16;
@@ -124,10 +126,11 @@ a {
 }
 
 .page-container {
-  max-width: 1240px;
-  margin: 0 auto;
-  padding: 2.25rem 1.75rem 3.5rem 1.75rem;
   width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 1.25rem 2rem 3.5rem 2rem;
+  box-sizing: border-box;
 }
 
 /* Tarjetas */
