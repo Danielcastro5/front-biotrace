@@ -160,7 +160,6 @@ import { AuthService } from '../../core/services/auth.service';
                   type="button"
                   class="eye-btn"
                   (click)="togglePasswordVisibility()"
-                  tabindex="-1"
                   aria-label="Ver u ocultar contraseña"
                 >
                   <svg *ngIf="!showPassword()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
