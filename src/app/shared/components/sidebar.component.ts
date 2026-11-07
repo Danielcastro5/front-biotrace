@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { UiStateService, SubViewTab } from '../../core/services/ui-state.service';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
+import { UiStateService } from '../../core/services/ui-state.service';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -23,9 +24,9 @@ import { AuthService } from '../../core/services/auth.service';
         <div class="lap-portal-sidebar__nav">
           <button
             type="button"
-            (click)="selectModule('inicio')"
+            (click)="navigateTo('/trazabilidad/inicio')"
             class="lap-sidebar-nav-item"
-            [class.lap-sidebar-nav-item--active]="ui.activeModule() === 'inicio'"
+            [class.lap-sidebar-nav-item--active]="isRouteActive('/trazabilidad/inicio')"
             title="Inicio"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -73,13 +74,15 @@ import { AuthService } from '../../core/services/auth.service';
             <!-- CONTENEDOR ANIDADO DE ESTACIONES -->
             <div class="lap-sidebar-nested-container" *ngIf="openEstaciones()">
               
-              <!-- SUBMENÚ: MATERIAS PRIMAS -->
+              <!-- ========================================== -->
+              <!-- SUBMENÚ 1: MATERIAS PRIMAS                -->
+              <!-- ========================================== -->
               <div class="lap-sidebar-station-group">
                 <button
                   type="button"
                   (click)="toggleSubmenu('materias-primas')"
                   class="lap-sidebar-station-header lap-sidebar-subgroup-header"
-                  [class.lap-sidebar-subgroup-header--active]="openSubmenus()['materias-primas']"
+                  [class.lap-sidebar-subgroup-header--active]="openSubmenus()['materias-primas'] || isCurrentPath('materia-prima')"
                   title="Materias Primas"
                 >
                   <div class="lap-sidebar-station-header__left">
@@ -101,14 +104,14 @@ import { AuthService } from '../../core/services/auth.service';
                 <!-- SUB-ESTACIONES ANIDADAS DE MATERIAS PRIMAS -->
                 <div class="lap-sidebar-submenu lap-sidebar-nested-substations" *ngIf="openSubmenus()['materias-primas']">
                   
-                  <!-- 1. INGRESO DE MATERIAS PRIMAS -->
+                  <!-- A. INGRESO MATERIA PRIMA (Submenú con Llenar Formato y Ver Registros) -->
                   <div class="lap-sidebar-station-group">
                     <button
                       type="button"
-                      (click)="toggleInnerSection('mp-ingreso')"
+                      (click)="toggleInnerSection('ingreso-mp')"
                       class="lap-sidebar-station-header lap-sidebar-station-header--sub"
-                      [class.lap-sidebar-station-header--active]="ui.activeModule() === 'mp-ingreso'"
-                      title="Ingreso de Materias Primas"
+                      [class.lap-sidebar-station-header--active]="isCurrentPath('materia-prima/ingreso')"
+                      title="Ingreso materia prima"
                     >
                       <div class="lap-sidebar-station-header__left">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -118,23 +121,23 @@ import { AuthService } from '../../core/services/auth.service';
                           <polyline points="3.29 7 12 12 20.71 7"></polyline>
                           <line x1="12" y1="22" x2="12" y2="12"></line>
                         </svg>
-                        <span>Ingreso</span>
+                        <span>Ingreso materia prima</span>
                       </div>
-                      <svg *ngIf="openInnerSections()['mp-ingreso']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg *ngIf="openInnerSections()['ingreso-mp']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="6 9 12 15 18 9"></polyline>
                       </svg>
-                      <svg *ngIf="!openInnerSections()['mp-ingreso']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg *ngIf="!openInnerSections()['ingreso-mp']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="9 18 15 12 9 6"></polyline>
                       </svg>
                     </button>
 
-                    <!-- Pestañas Ingreso: Llenar formato & Ver registros -->
-                    <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['mp-ingreso']">
+                    <!-- Páginas Independientes: Llenar formato & Ver registros -->
+                    <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['ingreso-mp']">
                       <button
                         type="button"
-                        (click)="selectSubStation('mp-ingreso', 'form')"
+                        (click)="navigateTo('/trazabilidad/estaciones/materia-prima/ingreso/formato')"
                         class="lap-sidebar-subitem"
-                        [class.lap-sidebar-subitem--active]="ui.activeModule() === 'mp-ingreso' && ui.activeTab() === 'form'"
+                        [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/materia-prima/ingreso/formato')"
                       >
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -147,9 +150,9 @@ import { AuthService } from '../../core/services/auth.service';
 
                       <button
                         type="button"
-                        (click)="selectSubStation('mp-ingreso', 'list')"
+                        (click)="navigateTo('/trazabilidad/estaciones/materia-prima/ingreso/registros')"
                         class="lap-sidebar-subitem"
-                        [class.lap-sidebar-subitem--active]="ui.activeModule() === 'mp-ingreso' && ui.activeTab() === 'list'"
+                        [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/materia-prima/ingreso/registros')"
                       >
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <circle cx="12" cy="12" r="10"></circle>
@@ -160,14 +163,14 @@ import { AuthService } from '../../core/services/auth.service';
                     </div>
                   </div>
 
-                  <!-- 2. CONSUMO DE MATERIAS PRIMAS -->
+                  <!-- B. CONSUMO MATERIA PRIMA (Submenú con Llenar Formato y Ver Registros) -->
                   <div class="lap-sidebar-station-group">
                     <button
                       type="button"
-                      (click)="toggleInnerSection('mp-consumo')"
+                      (click)="toggleInnerSection('consumo-mp')"
                       class="lap-sidebar-station-header lap-sidebar-station-header--sub"
-                      [class.lap-sidebar-station-header--active]="ui.activeModule() === 'mp-consumo'"
-                      title="Consumo de Materias Primas"
+                      [class.lap-sidebar-station-header--active]="isCurrentPath('materia-prima/consumo')"
+                      title="Consumo materia prima"
                     >
                       <div class="lap-sidebar-station-header__left">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -176,23 +179,23 @@ import { AuthService } from '../../core/services/auth.service';
                           <polyline points="3.29 7 12 12 20.71 7"></polyline>
                           <line x1="12" y1="22" x2="12" y2="12"></line>
                         </svg>
-                        <span>Consumo</span>
+                        <span>Consumo materia prima</span>
                       </div>
-                      <svg *ngIf="openInnerSections()['mp-consumo']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg *ngIf="openInnerSections()['consumo-mp']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="6 9 12 15 18 9"></polyline>
                       </svg>
-                      <svg *ngIf="!openInnerSections()['mp-consumo']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg *ngIf="!openInnerSections()['consumo-mp']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="9 18 15 12 9 6"></polyline>
                       </svg>
                     </button>
 
-                    <!-- Pestañas Consumo: Llenar formato & Ver registros -->
-                    <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['mp-consumo']">
+                    <!-- Páginas Independientes: Llenar formato & Ver registros -->
+                    <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['consumo-mp']">
                       <button
                         type="button"
-                        (click)="selectSubStation('mp-consumo', 'form')"
+                        (click)="navigateTo('/trazabilidad/estaciones/materia-prima/consumo/formato')"
                         class="lap-sidebar-subitem"
-                        [class.lap-sidebar-subitem--active]="ui.activeModule() === 'mp-consumo' && ui.activeTab() === 'form'"
+                        [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/materia-prima/consumo/formato')"
                       >
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -205,9 +208,9 @@ import { AuthService } from '../../core/services/auth.service';
 
                       <button
                         type="button"
-                        (click)="selectSubStation('mp-consumo', 'list')"
+                        (click)="navigateTo('/trazabilidad/estaciones/materia-prima/consumo/registros')"
                         class="lap-sidebar-subitem"
-                        [class.lap-sidebar-subitem--active]="ui.activeModule() === 'mp-consumo' && ui.activeTab() === 'list'"
+                        [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/materia-prima/consumo/registros')"
                       >
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <circle cx="12" cy="12" r="10"></circle>
@@ -218,27 +221,165 @@ import { AuthService } from '../../core/services/auth.service';
                     </div>
                   </div>
 
-                  <!-- 3. INVENTARIO Y STOCK -->
+                  <!-- C. INVENTARIO Y STOCK -->
                   <div class="lap-sidebar-station-group">
                     <button
                       type="button"
-                      (click)="selectSubStation('mp-inventario', 'list')"
-                      class="lap-sidebar-station-header lap-sidebar-station-header--sub"
-                      [class.lap-sidebar-station-header--active]="ui.activeModule() === 'mp-inventario'"
+                      (click)="navigateTo('/trazabilidad/estaciones/materia-prima/inventario')"
+                      class="lap-sidebar-subitem"
+                      [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/materia-prima/inventario')"
                       title="Inventario y Stock de Materias Primas"
                     >
-                      <div class="lap-sidebar-station-header__left">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                          <polyline points="2 17 12 22 22 17"></polyline>
-                          <polyline points="2 12 12 17 22 12"></polyline>
-                        </svg>
-                        <span>Inventario y Stock</span>
-                      </div>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                      </svg>
+                      <span>Inventario y Stock</span>
                     </button>
                   </div>
 
                 </div>
+              </div>
+
+              <!-- ========================================== -->
+              <!-- SUBMENÚ 2: FABRICACIÓN                     -->
+              <!-- ========================================== -->
+              <div class="lap-sidebar-station-group">
+                <button
+                  type="button"
+                  (click)="toggleSubmenu('fabricacion')"
+                  class="lap-sidebar-station-header lap-sidebar-subgroup-header"
+                  [class.lap-sidebar-subgroup-header--active]="openSubmenus()['fabricacion'] || isCurrentPath('fabricacion')"
+                  title="Fabricación"
+                >
+                  <div class="lap-sidebar-station-header__left">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                      <polyline points="2 17 12 22 22 17"></polyline>
+                      <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span>Fabricación</span>
+                  </div>
+                  <svg *ngIf="openSubmenus()['fabricacion']" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                  <svg *ngIf="!openSubmenus()['fabricacion']" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+
+                <div class="lap-sidebar-submenu lap-sidebar-nested-substations" *ngIf="openSubmenus()['fabricacion']">
+                  <!-- Llenar Formato -->
+                  <button
+                    type="button"
+                    (click)="navigateTo('/trazabilidad/estaciones/fabricacion/formato')"
+                    class="lap-sidebar-subitem"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/fabricacion/formato')"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <span>Llenar formato</span>
+                  </button>
+
+                  <!-- Ver Registros -->
+                  <button
+                    type="button"
+                    (click)="navigateTo('/trazabilidad/estaciones/fabricacion/registros')"
+                    class="lap-sidebar-subitem"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/fabricacion/registros')"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Ver registros</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ========================================== -->
+              <!-- SUBMENÚ 3: CONTROL DE CALIDAD              -->
+              <!-- ========================================== -->
+              <div class="lap-sidebar-station-group">
+                <button
+                  type="button"
+                  (click)="toggleSubmenu('control-calidad')"
+                  class="lap-sidebar-station-header lap-sidebar-subgroup-header"
+                  [class.lap-sidebar-subgroup-header--active]="openSubmenus()['control-calidad'] || isCurrentPath('control-calidad')"
+                  title="Control de Calidad"
+                >
+                  <div class="lap-sidebar-station-header__left">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                      <polyline points="9 12 11 14 15 10"></polyline>
+                    </svg>
+                    <span>Control de Calidad</span>
+                  </div>
+                  <svg *ngIf="openSubmenus()['control-calidad']" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                  <svg *ngIf="!openSubmenus()['control-calidad']" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                </button>
+
+                <div class="lap-sidebar-submenu lap-sidebar-nested-substations" *ngIf="openSubmenus()['control-calidad']">
+                  <!-- Llenar Formato -->
+                  <button
+                    type="button"
+                    (click)="navigateTo('/trazabilidad/estaciones/control-calidad/formato')"
+                    class="lap-sidebar-subitem"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/control-calidad/formato')"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    <span>Llenar formato</span>
+                  </button>
+
+                  <!-- Ver Registros -->
+                  <button
+                    type="button"
+                    (click)="navigateTo('/trazabilidad/estaciones/control-calidad/registros')"
+                    class="lap-sidebar-subitem"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/estaciones/control-calidad/registros')"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Ver registros</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ========================================== -->
+              <!-- SUBMENÚ 4: TRAZABILIDAD 360° (PÁGINA ÚNICA)  -->
+              <!-- ========================================== -->
+              <div class="lap-sidebar-station-group">
+                <button
+                  type="button"
+                  (click)="navigateTo('/trazabilidad/estaciones/trazabilidad-360')"
+                  class="lap-sidebar-station-header lap-sidebar-subgroup-header"
+                  [class.lap-sidebar-subgroup-header--active]="isRouteActive('/trazabilidad/estaciones/trazabilidad-360')"
+                  title="Trazabilidad 360° Integral"
+                >
+                  <div class="lap-sidebar-station-header__left">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Trazabilidad 360°</span>
+                  </div>
+                </button>
               </div>
 
             </div>
@@ -247,7 +388,7 @@ import { AuthService } from '../../core/services/auth.service';
           <!-- SECCIÓN: GESTIÓN COMERCIAL / VENTAS -->
           <span class="lap-sidebar-section-title" style="margin-top: 8px;">Comercial</span>
 
-          <!-- GRAN MENÚ 2: PEDIDOS / VENTAS / PRODUCTOS -->
+          <!-- GRAN MENÚ 2: COMERCIAL -->
           <div class="lap-sidebar-station-group lap-sidebar-master-group">
             <button
               type="button"
@@ -262,7 +403,7 @@ import { AuthService } from '../../core/services/auth.service';
                   <circle cx="19" cy="21" r="1"></circle>
                   <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
                 </svg>
-                <span class="lap-sidebar-master-header__text">PEDIDOS / VENTAS / PRODUCTOS</span>
+                <span class="lap-sidebar-master-header__text">COMERCIAL</span>
               </div>
               <svg *ngIf="openVentas()" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -272,176 +413,135 @@ import { AuthService } from '../../core/services/auth.service';
               </svg>
             </button>
 
-            <!-- CONTENEDOR ANIDADO DE VENTAS / CLIENTES / PRODUCTOS -->
+            <!-- CONTENEDOR ANIDADO DE COMERCIAL -->
             <div class="lap-sidebar-nested-container" *ngIf="openVentas()">
               
-              <!-- 1. SUBMENÚ: AGREGAR CLIENTES / CLIENTES -->
+              <!-- 1. Clientes -->
               <div class="lap-sidebar-station-group">
                 <button
                   type="button"
-                  (click)="toggleInnerSection('clientes')"
+                  (click)="toggleInnerSection('comercial-clientes')"
                   class="lap-sidebar-station-header lap-sidebar-station-header--sub"
-                  [class.lap-sidebar-station-header--active]="ui.activeModule() === 'clientes'"
+                  [class.lap-sidebar-station-header--active]="isCurrentPath('comercial/clientes')"
                   title="Gestión de Clientes"
                 >
                   <div class="lap-sidebar-station-header__left">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                       <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
-                    <span>Agregar Cliente</span>
+                    <span>Clientes</span>
                   </div>
-                  <svg *ngIf="openInnerSections()['clientes']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg *ngIf="openInnerSections()['comercial-clientes']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
-                  <svg *ngIf="!openInnerSections()['clientes']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg *ngIf="!openInnerSections()['comercial-clientes']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </button>
 
-                <!-- Pestañas Clientes: Llenar formato & Ver registros -->
-                <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['clientes']">
+                <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['comercial-clientes']">
                   <button
                     type="button"
-                    (click)="selectSubStation('clientes', 'form')"
+                    (click)="navigateTo('/trazabilidad/comercial/clientes/formato')"
                     class="lap-sidebar-subitem"
-                    [class.lap-sidebar-subitem--active]="ui.activeModule() === 'clientes' && ui.activeTab() === 'form'"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/comercial/clientes/formato')"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
                     <span>Llenar formato</span>
                   </button>
-
                   <button
                     type="button"
-                    (click)="selectSubStation('clientes', 'list')"
+                    (click)="navigateTo('/trazabilidad/comercial/clientes/registros')"
                     class="lap-sidebar-subitem"
-                    [class.lap-sidebar-subitem--active]="ui.activeModule() === 'clientes' && ui.activeTab() === 'list'"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/comercial/clientes/registros')"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
                     <span>Ver registros</span>
                   </button>
                 </div>
               </div>
 
-              <!-- 2. SUBMENÚ: AGREGAR PRODUCTOS / PRODUCTOS -->
+              <!-- 2. Productos -->
               <div class="lap-sidebar-station-group">
                 <button
                   type="button"
-                  (click)="toggleInnerSection('productos')"
+                  (click)="toggleInnerSection('comercial-productos')"
                   class="lap-sidebar-station-header lap-sidebar-station-header--sub"
-                  [class.lap-sidebar-station-header--active]="ui.activeModule() === 'productos'"
-                  title="Agregar Productos y Formulación"
+                  [class.lap-sidebar-station-header--active]="isCurrentPath('comercial/productos')"
+                  title="Catálogo de Productos"
                 >
                   <div class="lap-sidebar-station-header__left">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                      <polyline points="3.29 7 12 12 20.71 7"></polyline>
-                      <line x1="12" y1="22" x2="12" y2="12"></line>
                     </svg>
-                    <span>Agregar productos</span>
+                    <span>Productos</span>
                   </div>
-                  <svg *ngIf="openInnerSections()['productos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg *ngIf="openInnerSections()['comercial-productos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
-                  <svg *ngIf="!openInnerSections()['productos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg *ngIf="!openInnerSections()['comercial-productos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </button>
 
-                <!-- Pestañas Productos: Llenar formato & Ver registros -->
-                <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['productos']">
+                <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['comercial-productos']">
                   <button
                     type="button"
-                    (click)="selectSubStation('productos', 'form')"
+                    (click)="navigateTo('/trazabilidad/comercial/productos/formato')"
                     class="lap-sidebar-subitem"
-                    [class.lap-sidebar-subitem--active]="ui.activeModule() === 'productos' && ui.activeTab() === 'form'"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/comercial/productos/formato')"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
                     <span>Llenar formato</span>
                   </button>
-
                   <button
                     type="button"
-                    (click)="selectSubStation('productos', 'list')"
+                    (click)="navigateTo('/trazabilidad/comercial/productos/registros')"
                     class="lap-sidebar-subitem"
-                    [class.lap-sidebar-subitem--active]="ui.activeModule() === 'productos' && ui.activeTab() === 'list'"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/comercial/productos/registros')"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
                     <span>Ver registros</span>
                   </button>
                 </div>
               </div>
 
-              <!-- 3. SUBMENÚ: ORDEN PEDIDO / PEDIDOS -->
+              <!-- 3. Pedidos -->
               <div class="lap-sidebar-station-group">
                 <button
                   type="button"
-                  (click)="toggleInnerSection('pedidos')"
+                  (click)="toggleInnerSection('comercial-pedidos')"
                   class="lap-sidebar-station-header lap-sidebar-station-header--sub"
-                  [class.lap-sidebar-station-header--active]="ui.activeModule() === 'pedidos'"
-                  title="Órdenes de Pedido de Clientes"
+                  [class.lap-sidebar-station-header--active]="isCurrentPath('comercial/pedidos')"
+                  title="Órdenes de Pedido & Salida"
                 >
                   <div class="lap-sidebar-station-header__left">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
                       <path d="M3 6h18"></path>
-                      <path d="M16 10a4 4 0 0 1-8 0"></path>
                     </svg>
-                    <span>Orden pedido</span>
+                    <span>Órdenes de Pedido</span>
                   </div>
-                  <svg *ngIf="openInnerSections()['pedidos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg *ngIf="openInnerSections()['comercial-pedidos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
-                  <svg *ngIf="!openInnerSections()['pedidos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg *ngIf="!openInnerSections()['comercial-pedidos']" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </button>
 
-                <!-- Pestañas Pedidos: Llenar formato & Ver registros -->
-                <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['pedidos']">
+                <div class="lap-sidebar-submenu lap-sidebar-submenu--sub" *ngIf="openInnerSections()['comercial-pedidos']">
                   <button
                     type="button"
-                    (click)="selectSubStation('pedidos', 'form')"
+                    (click)="navigateTo('/trazabilidad/comercial/pedidos/formato')"
                     class="lap-sidebar-subitem"
-                    [class.lap-sidebar-subitem--active]="ui.activeModule() === 'pedidos' && ui.activeTab() === 'form'"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/comercial/pedidos/formato')"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" y1="13" x2="8" y2="13"></line>
-                      <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
                     <span>Llenar formato</span>
                   </button>
-
                   <button
                     type="button"
-                    (click)="selectSubStation('pedidos', 'list')"
+                    (click)="navigateTo('/trazabilidad/comercial/pedidos/registros')"
                     class="lap-sidebar-subitem"
-                    [class.lap-sidebar-subitem--active]="ui.activeModule() === 'pedidos' && ui.activeTab() === 'list'"
+                    [class.lap-sidebar-subitem--active]="isRouteActive('/trazabilidad/comercial/pedidos/registros')"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <polyline points="12 6 12 12 16 14"></polyline>
-                    </svg>
                     <span>Ver registros</span>
                   </button>
                 </div>
@@ -453,10 +553,9 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <!-- ============================================== -->
-        <!-- MODO COMPACTO (MINI SLOTS COMO EN LAPROBELL)   -->
+        <!-- MODO COMPACTO (MINI SLOTS)                     -->
         <!-- ============================================== -->
         <div *ngIf="!ui.sidebarExpanded()" class="lap-portal-sidebar__mini-icons">
-          <!-- Mini icono para Estaciones -->
           <div
             class="lap-portal-mini-slot"
             [class.lap-portal-mini-slot--active]="openEstaciones()"
@@ -471,11 +570,10 @@ import { AuthService } from '../../core/services/auth.service';
             </svg>
           </div>
 
-          <!-- Mini icono para Ventas / Clientes / Pedidos -->
           <div
             class="lap-portal-mini-slot"
             [class.lap-portal-mini-slot--active]="openVentas()"
-            title="Pedidos / Ventas / Productos"
+            title="Comercial / Clientes / Pedidos"
             (click)="expandWithVentas()"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -490,9 +588,6 @@ import { AuthService } from '../../core/services/auth.service';
     </aside>
   `,
   styles: [`
-    /* ==========================================================================
-       SIDEBAR MAESTRO DE NAVEGACIÓN (INTEGRADO AL LAYOUT - ESTILO LAPROBELL)
-       ========================================================================== */
     :host {
       display: block;
       flex-shrink: 0;
@@ -534,22 +629,11 @@ import { AuthService } from '../../core/services/auth.service';
       width: 4px;
     }
 
-    .lap-portal-sidebar__content::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
     .lap-portal-sidebar__content::-webkit-scrollbar-thumb {
       background: #e2e8f0;
       border-radius: 4px;
     }
 
-    .lap-portal-sidebar__content::-webkit-scrollbar-thumb:hover {
-      background: #cbd5e1;
-    }
-
-    /* --------------------------------------------------------------------------
-       BOTÓN INICIO (PANEL PRINCIPAL)
-       -------------------------------------------------------------------------- */
     .lap-portal-sidebar__nav {
       display: flex;
       flex-direction: column;
@@ -591,9 +675,6 @@ import { AuthService } from '../../core/services/auth.service';
       font-weight: 700;
     }
 
-    /* --------------------------------------------------------------------------
-       TÍTULO DE SECCIONES Y ENCABEZADOS DE ACORDEÓN
-       -------------------------------------------------------------------------- */
     .lap-sidebar-nav {
       display: flex;
       flex-direction: column;
@@ -651,9 +732,6 @@ import { AuthService } from '../../core/services/auth.service';
       color: #0891b2;
     }
 
-    /* ==========================================================================
-       GRAN ACORDEÓN PRINCIPAL (ESTACIONES Y VENTAS)
-       ========================================================================== */
     .lap-sidebar-master-group {
       margin-bottom: 4px;
     }
@@ -697,7 +775,6 @@ import { AuthService } from '../../core/services/auth.service';
       border-left: 2px solid #e2e8f0;
     }
 
-    /* Subgrupo de Materias Primas */
     .lap-sidebar-subgroup-header {
       font-size: 12.5px;
       padding: 7px 10px;
@@ -756,7 +833,6 @@ import { AuthService } from '../../core/services/auth.service';
       background: #ecfeff;
     }
 
-    /* Sub-menú para Llenar formato y Ver registros */
     .lap-sidebar-submenu--sub {
       padding-left: 14px;
       margin-left: 8px;
@@ -798,9 +874,6 @@ import { AuthService } from '../../core/services/auth.service';
       flex-shrink: 0;
     }
 
-    /* --------------------------------------------------------------------------
-       MINI SLOTS COMPACTOS (MODO PLEGADO COMO EN LAPROBELL)
-       -------------------------------------------------------------------------- */
     .lap-portal-sidebar__mini-icons {
       display: flex;
       flex-direction: column;
@@ -834,53 +907,99 @@ import { AuthService } from '../../core/services/auth.service';
       color: #0891b2;
       border: 1px solid rgba(6, 182, 212, 0.35);
     }
-  `],
+  `]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   ui = inject(UiStateService);
   auth = inject(AuthService);
   private router = inject(Router);
 
-  // Acordeón Principal 1: Estaciones
-  openEstaciones = signal<boolean>(true);
+  currentUrl = signal<string>('');
 
-  // Acordeón Principal 2: Ventas / Clientes / Pedidos
+  openEstaciones = signal<boolean>(true);
   openVentas = signal<boolean>(false);
 
-  // Submenús de primer nivel (Materias Primas)
   openSubmenus = signal<Record<string, boolean>>({
     'materias-primas': true,
+    'fabricacion': false,
+    'control-calidad': false,
+    'trazabilidad-360': false
   });
 
-  // Sub-secciones desplegables internas (Ingreso, Consumo, Clientes, Productos, Pedidos)
   openInnerSections = signal<Record<string, boolean>>({
-    'mp-ingreso': true,
-    'mp-consumo': false,
-    'clientes': false,
-    'productos': false,
-    'pedidos': false,
+    'ingreso-mp': true,
+    'consumo-mp': false
   });
+
+  ngOnInit() {
+    this.currentUrl.set(this.router.url);
+    this.syncAccordionsWithUrl(this.router.url);
+
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
+        this.currentUrl.set(event.urlAfterRedirects);
+        this.syncAccordionsWithUrl(event.urlAfterRedirects);
+      });
+  }
+
+  private syncAccordionsWithUrl(url: string) {
+    if (url.includes('/trazabilidad/estaciones/')) {
+      this.openEstaciones.set(true);
+      if (url.includes('materia-prima')) {
+        this.openSubmenus.update(m => ({ ...m, 'materias-primas': true }));
+        if (url.includes('/ingreso')) {
+          this.openInnerSections.update(s => ({ ...s, 'ingreso-mp': true }));
+        } else if (url.includes('/consumo')) {
+          this.openInnerSections.update(s => ({ ...s, 'consumo-mp': true }));
+        }
+      } else if (url.includes('fabricacion')) {
+        this.openSubmenus.update(m => ({ ...m, 'fabricacion': true }));
+      } else if (url.includes('control-calidad')) {
+        this.openSubmenus.update(m => ({ ...m, 'control-calidad': true }));
+      } else if (url.includes('trazabilidad-360')) {
+        this.openSubmenus.update(m => ({ ...m, 'trazabilidad-360': true }));
+      }
+    } else if (url.includes('/trazabilidad/comercial/')) {
+      this.openVentas.set(true);
+      if (url.includes('/clientes')) {
+        this.openInnerSections.update(s => ({ ...s, 'comercial-clientes': true }));
+      } else if (url.includes('/productos')) {
+        this.openInnerSections.update(s => ({ ...s, 'comercial-productos': true }));
+      } else if (url.includes('/pedidos')) {
+        this.openInnerSections.update(s => ({ ...s, 'comercial-pedidos': true }));
+      }
+    }
+  }
 
   toggleEstaciones() {
-    this.openEstaciones.update((v) => !v);
+    this.openEstaciones.update(v => !v);
   }
 
   toggleVentas() {
-    this.openVentas.update((v) => !v);
+    this.openVentas.update(v => !v);
   }
 
   toggleSubmenu(key: string) {
-    this.openSubmenus.update((prev) => ({
+    this.openSubmenus.update(prev => ({
       ...prev,
-      [key]: !prev[key],
+      [key]: !prev[key]
     }));
   }
 
   toggleInnerSection(key: string) {
-    this.openInnerSections.update((prev) => ({
+    this.openInnerSections.update(prev => ({
       ...prev,
-      [key]: !prev[key],
+      [key]: !prev[key]
     }));
+  }
+
+  isRouteActive(route: string): boolean {
+    return this.currentUrl() === route || this.currentUrl().startsWith(route + '/');
+  }
+
+  isCurrentPath(keyword: string): boolean {
+    return this.currentUrl().includes(keyword);
   }
 
   expandWithEstaciones() {
@@ -895,13 +1014,7 @@ export class SidebarComponent {
     this.openEstaciones.set(false);
   }
 
-  selectModule(moduleKey: string) {
-    this.ui.navigateTo(moduleKey, 'list');
-    this.router.navigate(['/home']);
-  }
-
-  selectSubStation(subStationKey: string, tab: SubViewTab) {
-    this.ui.navigateTo(subStationKey, tab);
-    this.router.navigate(['/home']);
+  navigateTo(path: string) {
+    this.router.navigate([path]);
   }
 }

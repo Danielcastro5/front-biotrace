@@ -1,4 +1,4 @@
-﻿# BioTrace Dermo-Pharma — Frontend SPA (ront-biotrace)
+﻿# BioTrace Dermo-Pharma — Frontend SPA (Front-biotrace)
 
 Aplicación Web Frontend para el **Sistema de Trazabilidad Industrial y Manufactura Multiproducto (BioTrace Dermo-Pharma)**, desarrollada exclusivamente con **Angular 19+**, Standalone Components, Angular Signals reactivos y sistema visual Titanio y Cian Glacial.
 
@@ -38,38 +38,7 @@ La aplicación estará disponible de inmediato en:
 
 ---
 
-## 4. Estructura del Proyecto
-
-`	ext
-front-biotrace/
-├── public/                  # Recursos estáticos e imágenes institucionales
-├── src/
-│   ├── index.html           # Tipografías Inter y Plus Jakarta Sans
-│   ├── styles.css           # Tokens de diseño Titanio/Cian y utilidades CSS Grid
-│   ├── main.ts              # Arranque Standalone de la aplicación
-│   └── app/
-│       ├── app.component.ts # Contenedor principal
-│       ├── app.routes.ts    # Enrutamiento protegido por authGuard
-│       ├── app.config.ts    # Inyección de HttpClient y authInterceptor
-│       ├── core/
-│       │   ├── guards/      # auth.guard.ts (Protección de rutas)
-│       │   ├── interceptors/# auth.interceptor.ts (Bearer token y refresh)
-│       │   ├── models/      # Modelos e interfaces TypeScript
-│       │   └── services/    # auth.service.ts, api.service.ts
-│       ├── shared/
-│       │   └── components/  # navbar.component.ts (con timer en vivo)
-│       └── features/
-│           ├── auth/        # login.component.ts
-│           └── home/        # home.component.ts (Módulos de trazabilidad y catálogos)
-├── angular.json             # Configuración Angular CLI
-├── proxy.conf.json          # Proxy de desarrollo: /api -> http://127.0.0.1:3000
-├── package.json             # Scripts y dependencias
-└── tsconfig.json            # Configuración TypeScript estricta
-`
-
----
-
-## 5. Módulos y Consultas Disponibles
+## 4. Módulos y Consultas Disponibles
 
 1. **Dashboard & Catálogos**: Productos, Materias Primas / Principios Activos, Proveedores y Clientes de Laboratorio.
 2. **Recepción e Inventario**: Lotes de materia prima, saldo en reactores y almacén.
