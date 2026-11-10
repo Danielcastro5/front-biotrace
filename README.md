@@ -44,6 +44,4 @@ La aplicación estará disponible de inmediato en:
 2. **Recepción e Inventario**: Lotes de materia prima, saldo en reactores y almacén.
 3. **Órdenes y Fabricación**: Órdenes de formulación con balance de consumos, envasado y acondicionamiento.
 4. **Control de Calidad (GMP/BPM)**: Liberación de lotes de producto terminado.
-5. **Trazabilidad 360°**:
-   - **Ascendente (Backward)**: Desde lote terminado hacia formulación, pesaje y lote de insumo del proveedor.
-   - **Descendente (Forward)**: Desde lote de materia prima hacia reactores, lotes fabricados y clientes despachados.
+5. **Trazabilidad 360°**: Desde lote de materia prima hacia reactores, lotes fabricados y clientes despachados.
