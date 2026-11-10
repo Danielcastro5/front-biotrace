@@ -672,10 +672,10 @@ export class InicioComponent implements OnInit {
   auth = inject(AuthService);
 
   stats = signal({
-    mpIngresos: 14,
-    mpConsumos: 18,
-    fabricaciones: 6,
-    calidadLiberaciones: 100
+    mpIngresos: 0,
+    mpConsumos: 0,
+    fabricaciones: 0,
+    calidadLiberaciones: 0
   });
 
   ngOnInit() {
@@ -685,7 +685,7 @@ export class InicioComponent implements OnInit {
   private cargarEstadisticas() {
     this.api.list<any>('inventory').subscribe({
       next: (items) => {
-        if (items && items.length) {
+        if (items) {
           this.stats.update(s => ({ ...s, mpIngresos: items.length }));
         }
       },
@@ -694,7 +694,7 @@ export class InicioComponent implements OnInit {
 
     this.api.list<any>('consumptions').subscribe({
       next: (consumos) => {
-        if (consumos && consumos.length) {
+        if (consumos) {
           this.stats.update(s => ({ ...s, mpConsumos: consumos.length }));
         }
       },
@@ -703,8 +703,19 @@ export class InicioComponent implements OnInit {
 
     this.api.list<any>('production-orders').subscribe({
       next: (orders) => {
-        if (orders && orders.length) {
+        if (orders) {
           this.stats.update(s => ({ ...s, fabricaciones: orders.length }));
+        }
+      },
+      error: () => {}
+    });
+
+    this.api.list<any>('quality').subscribe({
+      next: (qualities) => {
+        if (qualities && qualities.length > 0) {
+          const aprobados = qualities.filter((q: any) => q.muestra_aprobada).length;
+          const pct = Math.round((aprobados / qualities.length) * 100);
+          this.stats.update(s => ({ ...s, calidadLiberaciones: pct }));
         }
       },
       error: () => {}

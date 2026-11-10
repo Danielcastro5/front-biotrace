@@ -218,7 +218,7 @@ import { TraceabilityDataService, IngresoMpRecord } from '../../../../../../core
 
     <!-- MODAL EDITAR REGISTRO -->
     <div class="modal-backdrop" *ngIf="editItem()" (click)="editItem.set(null)">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet modal-sheet--wide" (click)="$event.stopPropagation()">
         <div class="modal-sheet-header">
           <div class="modal-title-wrap">
             <div class="modal-icon-badge" style="background: #eff6ff; color: #2563eb;">
@@ -228,29 +228,115 @@ import { TraceabilityDataService, IngresoMpRecord } from '../../../../../../core
             </div>
             <div>
               <h3>Editar Lote de Materia Prima</h3>
-              <p>Lote Interno: {{ editItem()?.loteInterno }}</p>
+              <p>Formato completo de recepción técnica — Lote Interno: {{ editItem()?.loteInterno }}</p>
             </div>
           </div>
           <button class="modal-close-btn" (click)="editItem.set(null)">&times;</button>
         </div>
 
         <div class="modal-body" *ngIf="editItem() as item">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Cantidad Recibida (Kg/L)</label>
-              <input type="number" [(ngModel)]="item.cantidadRecibida" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          <!-- SECCIÓN 1: HOMOLOGACIÓN E IDENTIFICACIÓN -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">1. Identificación y Homologación del Insumo</span>
+              <span class="modal-fieldset-badge">GMP / BPM</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Estado de Calidad</label>
-              <select [(ngModel)]="item.estadoCalidad" class="filter-select" style="width: 100%; margin-top: 4px; padding: 0.5rem;">
-                <option value="Aprobado">Aprobado</option>
-                <option value="Cuarentena">Cuarentena</option>
-                <option value="Rechazado">Rechazado</option>
-              </select>
+            <div class="modal-form-grid modal-form-grid--3">
+              <div class="modal-field">
+                <label class="modal-field-label">Lote Interno BioTrace <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.loteInterno" class="modal-field-input" placeholder="LOT-MP-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Materia Prima / Insumo <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.producto" class="modal-field-input" placeholder="Nombre comercial / INCI" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Código Interno Insumo <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.codigoInsumo" class="modal-field-input" placeholder="MP-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Proveedor Homologado <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.proveedor" class="modal-field-input" placeholder="Laboratorio proveedor" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Lote del Fabricante / Prov. <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.loteProveedor" class="modal-field-input" placeholder="Lote externo" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Aspecto Organoléptico</label>
+                <input type="text" [(ngModel)]="item.aspecto" class="modal-field-input" placeholder="Polvo blanco, líquido..." />
+              </div>
             </div>
-            <div style="grid-column: 1 / -1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Observaciones</label>
-              <textarea [(ngModel)]="item.observaciones" rows="3" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;"></textarea>
+          </div>
+
+          <!-- SECCIÓN 2: CANTIDADES, COSTOS Y FECHAS -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">2. Cantidad, Costos y Control de Vencimiento</span>
+              <span class="modal-fieldset-badge">Balanza Calibrada</span>
+            </div>
+            <div class="modal-form-grid modal-form-grid--4">
+              <div class="modal-field">
+                <label class="modal-field-label">Cantidad Recibida <span class="req">*</span></label>
+                <input type="number" [(ngModel)]="item.cantidadRecibida" (ngModelChange)="actualizarCosto()" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Unidad de Medida <span class="req">*</span></label>
+                <select [(ngModel)]="item.unidades" class="modal-field-select">
+                  <option value="Kg">Kg (Kilogramos)</option>
+                  <option value="L">L (Litros)</option>
+                  <option value="g">g (Gramos)</option>
+                  <option value="mL">mL (Mililitros)</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Precio Unitario ($)</label>
+                <input type="number" [(ngModel)]="item.precioUnitario" (ngModelChange)="actualizarCosto()" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Costo Total ($)</label>
+                <input type="number" [(ngModel)]="item.costoTotal" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Fecha de Recepción <span class="req">*</span></label>
+                <input type="date" [(ngModel)]="item.fechaRecepcion" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Fecha de Vencimiento <span class="req">*</span></label>
+                <input type="date" [(ngModel)]="item.fechaVencimiento" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Liberado Por (Analista / QA) <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.liberadoPor" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Certificado COA (Archivo / Nº)</label>
+                <input type="text" [(ngModel)]="item.coaArchivo" class="modal-field-input" placeholder="COA-..." />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: DICTAMEN DE CALIDAD & OBSERVACIONES -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">3. Estado de Calidad & Observaciones</span>
+              <span class="modal-fieldset-badge" [style.color]="item.estadoCalidad === 'Aprobado' ? '#16a34a' : item.estadoCalidad === 'Cuarentena' ? '#d97706' : '#dc2626'">
+                {{ item.estadoCalidad }}
+              </span>
+            </div>
+            <div class="modal-form-grid">
+              <div class="modal-field">
+                <label class="modal-field-label">Estado de Liberación de Calidad <span class="req">*</span></label>
+                <select [(ngModel)]="item.estadoCalidad" class="modal-field-select">
+                  <option value="Aprobado">Aprobado</option>
+                  <option value="Cuarentena">Cuarentena</option>
+                  <option value="Rechazado">Rechazado</option>
+                </select>
+              </div>
+              <div class="modal-field modal-form-grid--full">
+                <label class="modal-field-label">Observaciones Técnicas de Recepción</label>
+                <textarea [(ngModel)]="item.observaciones" rows="3" class="modal-field-textarea" placeholder="Novedades de embalaje, sellos de seguridad intactos, etc."></textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -326,6 +412,15 @@ export class MpIngresoRegistrosComponent {
 
   editarRegistro(item: IngresoMpRecord) {
     this.editItem.set({ ...item });
+  }
+
+  actualizarCosto() {
+    const it = this.editItem();
+    if (it) {
+      const cant = Number(it.cantidadRecibida) || 0;
+      const precio = Number(it.precioUnitario) || 0;
+      it.costoTotal = Number((cant * precio).toFixed(2));
+    }
   }
 
   guardarEdicion() {

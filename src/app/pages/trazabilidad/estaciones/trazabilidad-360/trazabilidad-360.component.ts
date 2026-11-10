@@ -73,29 +73,16 @@ interface TraceChain {
             </button>
           </div>
 
-          <!-- CHIPS DE ACCESO RÁPIDO A LOS 3 CASOS -->
+          <!-- CHIPS DE ACCESO RÁPIDO GENERADOS DESDE LA BASE DE DATOS -->
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem;">
             <span style="font-size: 0.72rem; font-weight: 700; color: #64748b;">Rastreo Rápido:</span>
             <button
+              *ngFor="let p of data.pedidos().slice(0, 5)"
               type="button"
               class="quick-chip"
-              (click)="seleccionarCaso('PED-2026-001')"
+              (click)="seleccionarCaso(p.numeroPedido)"
             >
-              PED-2026-001 • LOT-SH-2026-001 (Sérum Hialurónico)
-            </button>
-            <button
-              type="button"
-              class="quick-chip"
-              (click)="seleccionarCaso('PED-2026-002')"
-            >
-              PED-2026-002 • LOT-CR-2026-015 (Crema Ceramid-5)
-            </button>
-            <button
-              type="button"
-              class="quick-chip"
-              (click)="seleccionarCaso('PED-2026-003')"
-            >
-              PED-2026-003 • LOT-TG-2026-042 (Tónico Botánico)
+              {{ p.numeroPedido }} • {{ p.loteAsignado }} ({{ p.productoNombre }})
             </button>
           </div>
         </div>
@@ -564,13 +551,15 @@ export class Trazabilidad360Component implements OnInit {
   data = inject(TraceabilityDataService);
   private route = inject(ActivatedRoute);
 
-  searchCode = 'PED-2026-001';
+  searchCode = '';
   activeChain = signal<TraceChain | null>(null);
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['q']) {
         this.searchCode = params['q'];
+      } else if (this.data.pedidos().length > 0) {
+        this.searchCode = this.data.pedidos()[0].numeroPedido;
       }
       this.ejecutarRastreo();
     });

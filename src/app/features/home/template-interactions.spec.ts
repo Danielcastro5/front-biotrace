@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const componentPaths = [
-  'src/app/features/auth/login.component.ts',
+  'src/app/pages/login/login.component.ts',
   'src/app/features/home/home.component.ts',
   'src/app/shared/components/navbar.component.ts',
   'src/app/shared/components/sidebar.component.ts',

@@ -197,7 +197,7 @@ import { TraceabilityDataService, ClienteRecord } from '../../../../../core/serv
 
     <!-- MODAL EDITAR CLIENTE -->
     <div class="modal-backdrop" *ngIf="editItem()" (click)="editItem.set(null)">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet modal-sheet--wide" (click)="$event.stopPropagation()">
         <div class="modal-sheet-header">
           <div class="modal-title-wrap">
             <div class="modal-icon-badge" style="background: #eff6ff; color: #2563eb;">
@@ -207,25 +207,89 @@ import { TraceabilityDataService, ClienteRecord } from '../../../../../core/serv
             </div>
             <div>
               <h3>Editar Cliente Comercial</h3>
-              <p>{{ editItem()?.razonSocial }}</p>
+              <p>Formato completo de directorio de clientes — {{ editItem()?.razonSocial }}</p>
             </div>
           </div>
           <button class="modal-close-btn" (click)="editItem.set(null)">&times;</button>
         </div>
 
         <div class="modal-body" *ngIf="editItem() as item">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Persona de Contacto</label>
-              <input type="text" [(ngModel)]="item.contacto" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          <!-- SECCIÓN 1: IDENTIFICACIÓN Y CATEGORÍA -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">1. Identificación Corporativa & Razón Social</span>
+              <span class="modal-fieldset-badge">{{ item.categoria }}</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Teléfono</label>
-              <input type="text" [(ngModel)]="item.telefono" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+            <div class="modal-form-grid modal-form-grid--3">
+              <div class="modal-field">
+                <label class="modal-field-label">Código de Cliente <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.codigo" class="modal-field-input" placeholder="CLI-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Razón Social / Empresa <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.razonSocial" class="modal-field-input" placeholder="Nombre de empresa" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">NIT / Documento Fiscal <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.nit" class="modal-field-input" placeholder="900.000.000-0" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Categoría Comercial <span class="req">*</span></label>
+                <select [(ngModel)]="item.categoria" class="modal-field-select">
+                  <option value="Cliente Magistral VIP">Cliente Magistral VIP</option>
+                  <option value="Distribuidor Nacional">Distribuidor Nacional</option>
+                  <option value="Cadena de Clínicas">Cadena de Clínicas</option>
+                  <option value="Farmacia Magistral">Farmacia Magistral</option>
+                  <option value="Laboratorio Aliado">Laboratorio Aliado</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Estado de Cuenta <span class="req">*</span></label>
+                <select [(ngModel)]="item.estado" class="modal-field-select">
+                  <option value="Activo">Activo</option>
+                  <option value="Inactivo">Inactivo</option>
+                </select>
+              </div>
             </div>
-            <div style="grid-column: 1 / -1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Dirección de Despacho</label>
-              <input type="text" [(ngModel)]="item.direccion" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          </div>
+
+          <!-- SECCIÓN 2: CONTACTO Y COMUNICACIÓN -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">2. Contacto Comercial & Notificaciones</span>
+              <span class="modal-fieldset-badge">Canal Directo</span>
+            </div>
+            <div class="modal-form-grid modal-form-grid--3">
+              <div class="modal-field">
+                <label class="modal-field-label">Persona de Contacto y Cargo <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.contacto" class="modal-field-input" placeholder="Ej: Dr. Roberto Gómez (Compras)" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Correo Institucional <span class="req">*</span></label>
+                <input type="email" [(ngModel)]="item.correo" class="modal-field-input" placeholder="compras@empresa.com" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Teléfono / PBX <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.telefono" class="modal-field-input" placeholder="+57 (4) 000-0000" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: UBICACIÓN Y DESPACHO -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">3. Ubicación y Dirección de Entrega</span>
+              <span class="modal-fieldset-badge">Logística</span>
+            </div>
+            <div class="modal-form-grid">
+              <div class="modal-field">
+                <label class="modal-field-label">Ciudad / Departamento <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.ciudad" class="modal-field-input" placeholder="Ej: Medellín, Antioquia" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Dirección Fiscal y de Despacho <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.direccion" class="modal-field-input" placeholder="Cra / Calle / Bodega..." />
+              </div>
             </div>
           </div>
         </div>

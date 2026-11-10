@@ -243,7 +243,7 @@ import { TraceabilityDataService, ConsumoMpRecord } from '../../../../../../core
 
     <!-- MODAL EDITAR CONSUMO -->
     <div class="modal-backdrop" *ngIf="editItem()" (click)="editItem.set(null)">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet modal-sheet--extra-wide" (click)="$event.stopPropagation()">
         <div class="modal-sheet-header">
           <div class="modal-title-wrap">
             <div class="modal-icon-badge" style="background: #eff6ff; color: #2563eb;">
@@ -252,26 +252,141 @@ import { TraceabilityDataService, ConsumoMpRecord } from '../../../../../../core
               </svg>
             </div>
             <div>
-              <h3>Editar Registro de Consumo</h3>
-              <p>Código: {{ editItem()?.codigoConsumo }}</p>
+              <h3>Editar Registro de Consumo & Dosificación</h3>
+              <p>Formato completo de pesada y balance en reactor — Código: {{ editItem()?.codigoConsumo }}</p>
             </div>
           </div>
           <button class="modal-close-btn" (click)="editItem.set(null)">&times;</button>
         </div>
 
         <div class="modal-body" *ngIf="editItem() as item">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Reactor</label>
-              <input type="text" [(ngModel)]="item.reactor" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          <!-- SECCIÓN 1: VÍNCULO DE ORDEN Y PRODUCTO -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">1. Vínculo Comercial & Lote Asignado</span>
+              <span class="modal-fieldset-badge">Cadena 360°</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Operador</label>
-              <input type="text" [(ngModel)]="item.operador" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+            <div class="modal-form-grid modal-form-grid--3">
+              <div class="modal-field">
+                <label class="modal-field-label">Código de Consumo <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.codigoConsumo" class="modal-field-input" placeholder="CON-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Número de Pedido Comercial <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.numeroPedido" class="modal-field-input" placeholder="PED-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Cliente / Laboratorio <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.clienteNombre" class="modal-field-input" placeholder="Razón social" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Producto a Formular <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.productoNombre" class="modal-field-input" placeholder="Nombre producto" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Lote de Producto Asignado <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.loteAsignado" class="modal-field-input" placeholder="LOT-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Estado de Balance <span class="req">*</span></label>
+                <select [(ngModel)]="item.estado" class="modal-field-select">
+                  <option value="Conforme">Conforme</option>
+                  <option value="Con Desviación">Con Desviación</option>
+                </select>
+              </div>
             </div>
-            <div style="grid-column: 1 / -1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Observaciones</label>
-              <textarea [(ngModel)]="item.observaciones" rows="3" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;"></textarea>
+          </div>
+
+          <!-- SECCIÓN 2: CONDICIONES DE PROCESO Y OPERADOR -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">2. Estación, Equipo y Operador Responsable</span>
+              <span class="modal-fieldset-badge">BPM</span>
+            </div>
+            <div class="modal-form-grid modal-form-grid--3">
+              <div class="modal-field">
+                <label class="modal-field-label">Reactor / Marmita <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.reactor" class="modal-field-input" placeholder="Reactor R-101 / Marmita..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Fecha de Consumo / Pesada <span class="req">*</span></label>
+                <input type="date" [(ngModel)]="item.fechaConsumo" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Operador de Pesada <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.operador" class="modal-field-input" placeholder="Nombre operador" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: MATERIAS PRIMAS DOSIFICADAS -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">3. Detalle de Materias Primas Dosificadas en Reactor</span>
+              <button type="button" class="btn-sub-add" (click)="agregarDetalle()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Agregar Materia Prima</span>
+              </button>
+            </div>
+
+            <div class="modal-table-editable-wrap">
+              <table class="modal-table-editable">
+                <thead>
+                  <tr>
+                    <th style="min-width: 200px;">Materia Prima / Insumo</th>
+                    <th style="min-width: 140px;">Lote MP</th>
+                    <th style="width: 110px;">Teórico (Kg)</th>
+                    <th style="width: 110px;">Real Pesado (Kg)</th>
+                    <th style="width: 80px;">Unidad</th>
+                    <th style="min-width: 160px;">Balanza Calibrada</th>
+                    <th style="width: 45px; text-align: center;">Quitar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let det of item.detalles; let i = index">
+                    <td>
+                      <input type="text" [(ngModel)]="det.materiaPrima" class="modal-table-input" placeholder="Ej: Ácido Hialurónico..." />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="det.loteMp" class="modal-table-input" placeholder="LOT-MP-..." />
+                    </td>
+                    <td>
+                      <input type="number" step="0.01" [(ngModel)]="det.programadoKg" class="modal-table-input" />
+                    </td>
+                    <td>
+                      <input type="number" step="0.01" [(ngModel)]="det.realConsumidoKg" class="modal-table-input" style="font-weight: 700; color: #0891b2;" />
+                    </td>
+                    <td>
+                      <select [(ngModel)]="det.unidad" class="modal-table-select">
+                        <option value="Kg">Kg</option>
+                        <option value="L">L</option>
+                        <option value="g">g</option>
+                      </select>
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="det.balanza" class="modal-table-input" placeholder="Balanza BAL-01..." />
+                    </td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn-icon-delete-row" (click)="eliminarDetalle(i)" title="Eliminar fila" [disabled]="item.detalles.length <= 1">
+                        &times;
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: OBSERVACIONES -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">4. Observaciones de Operación y Mezcla</span>
+            </div>
+            <div class="modal-field">
+              <textarea [(ngModel)]="item.observaciones" rows="3" class="modal-field-textarea" placeholder="Desviaciones de pesada, doble verificación BPM o incidencias en reactor..."></textarea>
             </div>
           </div>
         </div>
@@ -347,7 +462,34 @@ export class MpConsumoRegistrosComponent {
   }
 
   editarRegistro(item: ConsumoMpRecord) {
-    this.editItem.set({ ...item });
+    this.editItem.set({
+      ...item,
+      detalles: item.detalles.map(d => ({ ...d }))
+    });
+  }
+
+  agregarDetalle() {
+    const item = this.editItem();
+    if (item) {
+      item.detalles = [
+        ...item.detalles,
+        {
+          materiaPrima: '',
+          loteMp: '',
+          programadoKg: 0,
+          realConsumidoKg: 0,
+          unidad: 'Kg',
+          balanza: 'Balanza Analítica Sartorius BAL-01'
+        }
+      ];
+    }
+  }
+
+  eliminarDetalle(index: number) {
+    const item = this.editItem();
+    if (item && item.detalles.length > 1) {
+      item.detalles = item.detalles.filter((_, i) => i !== index);
+    }
   }
 
   guardarEdicion() {

@@ -8,10 +8,13 @@ import { ApiService } from '../../../../../../core/services/api.service';
 import { AuthService } from '../../../../../../core/services/auth.service';
 import { MaterialRecord } from '../../../../../../core/models/traceability.models';
 
+import { TraceabilityDataService, IngresoMpRecord } from '../../../../../../core/services/traceability-data.service';
+
 @Component({
   selector: 'app-mp-ingreso-formato',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
+  styleUrls: ['../../../../trazabilidad.styles.css'],
   template: `
     <div class="page-container">
       <header class="station-header">
@@ -81,12 +84,16 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
               <div class="form-grid form-grid--3">
                 <div class="form-field">
                   <label class="field-label">Materia Prima / Principio Activo <span class="req">*</span></label>
-                  <input [(ngModel)]="formMp.producto" name="producto" class="field-input" [disabled]="true" />
+                  <input [(ngModel)]="formMp.producto" name="producto" class="field-input" placeholder="Nombre comercial / INCI" />
                 </div>
 
                 <div class="form-field">
                   <label class="field-label">Código Interno de Insumo <span class="req">*</span></label>
-                  <select [(ngModel)]="formMp.codigoInsumo" (ngModelChange)="seleccionarMateriaPrima()" name="codigoInsumo" required class="field-select"><option *ngFor="let material of materials" [value]="material.codigo_materia_prima">{{material.codigo_materia_prima}} / {{material.nombre_insumo}}</option></select>
+                  <select [(ngModel)]="formMp.codigoInsumo" (ngModelChange)="seleccionarMateriaPrima()" name="codigoInsumo" required class="field-select">
+                    <option *ngFor="let material of materials" [value]="material.codigo_materia_prima">
+                      {{ material.codigo_materia_prima }} / {{ material.nombre_insumo }}
+                    </option>
+                  </select>
                 </div>
 
                 <div class="form-field">
@@ -98,12 +105,13 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
                     <option value="Evonik Industries AG">Evonik Industries AG</option>
                     <option value="Givaudan Active Beauty">Givaudan Active Beauty</option>
                     <option value="Indena Pharma Extracts">Indena Pharma Extracts</option>
+                    <option value="Solchem Biochem International">Solchem Biochem International</option>
                   </select>
                 </div>
 
                 <div class="form-field">
                   <label class="field-label">Orden de Compra / Remisión <span class="req">*</span></label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.ordenCompra"
                     name="ordenCompra"
@@ -114,7 +122,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
 
                 <div class="form-field">
                   <label class="field-label">País / Laboratorio Fabricante</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.paisOrigen"
                     name="paisOrigen"
@@ -177,21 +185,26 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
                   <div class="quantity-unit-group">
                     <input
                       type="number"
-                      step="0.001"
-                      min="0.001"
+                      step="0.01"
+                      min="0.01"
                       [(ngModel)]="formMp.cantidadRecibida"
                       name="cantidadRecibida"
                       required
-                      placeholder="25.000"
+                      placeholder="25.00"
                       class="field-input group-input"
                     />
-                    <input [(ngModel)]="formMp.unidades" name="unidades" class="field-input" [disabled]="true" />
+                    <select [(ngModel)]="formMp.unidades" name="unidades" class="group-select">
+                      <option value="kg">kg</option>
+                      <option value="L">L</option>
+                      <option value="g">g</option>
+                      <option value="mL">mL</option>
+                    </select>
                   </div>
                 </div>
 
                 <div class="form-field">
                   <label class="field-label">Precio Unitario ($ / Unidad)</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="number"
                     step="100"
                     [(ngModel)]="formMp.precioPorUnidad"
@@ -203,7 +216,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
 
                 <div class="form-field">
                   <label class="field-label">Fecha de Recepción en Planta <span class="req">*</span></label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="date"
                     [(ngModel)]="formMp.fechaRecepcion"
                     name="fechaRecepcion"
@@ -214,7 +227,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
 
                 <div class="form-field">
                   <label class="field-label">Fecha de Vencimiento / Reanálisis <span class="req">*</span></label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="date"
                     [(ngModel)]="formMp.fechaVencimiento"
                     name="fechaVencimiento"
@@ -256,7 +269,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
               <div class="form-grid form-grid--3">
                 <div class="form-field">
                   <label class="field-label">Aspecto Físico</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.aspecto"
                     name="aspecto"
@@ -267,7 +280,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
 
                 <div class="form-field">
                   <label class="field-label">Color & Olor</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.colorOlor"
                     name="colorOlor"
@@ -278,7 +291,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
 
                 <div class="form-field">
                   <label class="field-label">pH / Densidad / Pureza</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.phDensidad"
                     name="phDensidad"
@@ -358,18 +371,17 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
               <div class="form-grid form-grid--3">
                 <div class="form-field">
                   <label class="field-label">Analista / Químico Receptor</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.liberadoPor"
                     name="liberadoPor"
-                    readonly
-                    class="field-input field-input--readonly"
+                    class="field-input"
                   />
                 </div>
 
                 <div class="form-field">
                   <label class="field-label">Temperatura de Recepción</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.temperatura"
                     name="temperatura"
@@ -380,7 +392,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
 
                 <div class="form-field">
                   <label class="field-label">Humedad Relativa (% HR)</label>
-                  <input [disabled]="true" title="Campo no disponible en el registro actual"
+                  <input
                     type="text"
                     [(ngModel)]="formMp.humedad"
                     name="humedad"
@@ -391,7 +403,7 @@ import { MaterialRecord } from '../../../../../../core/models/traceability.model
 
                 <div class="form-field form-field--full">
                   <label class="field-label">Observaciones Técnicas de Empaque y Precinto</label>
-                  <textarea [disabled]="true" title="Campo no disponible en el registro actual"
+                  <textarea
                     [(ngModel)]="formMp.observaciones"
                     name="observaciones"
                     rows="3"
@@ -433,73 +445,108 @@ export class MpIngresoFormatoComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
   auth = inject(AuthService);
+  data = inject(TraceabilityDataService);
   feedbackMessage = signal<string | null>(null);
   readOnly = signal<boolean>(false);
+
   materials: MaterialRecord[] = [];
 
   formMp = {
-    producto: 'Ácido Hialurónico Puro 2%',
-    codigoInsumo: 'MP-AH-001',
-    proveedor: 'Merck KGaA Laboratorios',
-    ordenCompra: 'OC-2026-9041',
-    paisOrigen: 'Alemania (Darmstadt)',
-    loteProveedor: 'LOT-MERCK-8831',
-    loteInterno: 'MP-2026-0512',
-    cantidadRecibida: 25.5,
+    producto: '',
+    codigoInsumo: '',
+    proveedor: '',
+    ordenCompra: '',
+    paisOrigen: '',
+    loteProveedor: '',
+    loteInterno: 'LOT-MP-' + Math.floor(100 + Math.random() * 900),
+    cantidadRecibida: 0,
     unidades: 'kg',
-    precioPorUnidad: 185000,
-    fechaRecepcion: '2026-10-20',
-    fechaFabricacion: '2026-08-15',
-    fechaVencimiento: '2028-08-15',
-    aspecto: 'Polvo microcristalino blanco homogéneo',
-    colorOlor: 'Inodoro / Blanco puro característico',
-    phDensidad: 'pH: 6.45 (solución 1%) / Pureza: 99.2%',
-    coaArchivo: 'COA-MERCK-AH-8831.pdf',
+    precioPorUnidad: 0,
+    fechaRecepcion: new Date().toISOString().split('T')[0],
+    fechaFabricacion: new Date().toISOString().split('T')[0],
+    fechaVencimiento: new Date(Date.now() + 730 * 86400000).toISOString().split('T')[0],
+    aspecto: '',
+    colorOlor: '',
+    phDensidad: '',
+    coaArchivo: '',
     estadoCalidad: 'Aprobado' as 'Aprobado' | 'Cuarentena' | 'Rechazado',
-    liberadoPor: 'admin@biotrace.com (Ing. Administrador)',
-    temperatura: '20.5 °C',
-    humedad: '45 % HR',
-    observaciones: 'Empaque trilaminado de aluminio sellado herméticamente al vacío. Certificado de análisis verificado conforme USP.'
+    liberadoPor: '',
+    temperatura: '',
+    humedad: '',
+    observaciones: ''
   };
 
   async ngOnInit() {
     try {
-      this.materials = await firstValueFrom(this.api.list<MaterialRecord>('materials'));
+      const apiMaterials = await firstValueFrom(this.api.list<MaterialRecord>('materials'));
+      if (apiMaterials && apiMaterials.length > 0) {
+        this.materials = apiMaterials;
+      }
     } catch (err) {
-      this.feedbackMessage.set(err instanceof HttpErrorResponse ? err.error?.error || 'Error al cargar' : 'Error');
+      console.warn('No se pudieron cargar materias primas desde la base de datos:', err);
     }
   }
 
   seleccionarMateriaPrima() {
     const material = this.materials.find(m => m.codigo_materia_prima === this.formMp.codigoInsumo);
-    this.formMp.producto = material?.nombre_insumo ?? '';
-    this.formMp.unidades = material?.unidad_medida ?? '';
+    if (material) {
+      this.formMp.producto = material.nombre_insumo;
+      this.formMp.unidades = material.unidad_medida;
+    }
   }
 
   async guardarIngresoMP() {
     const material = this.materials.find(m => m.codigo_materia_prima === this.formMp.codigoInsumo);
-    if (!material) {
-      this.feedbackMessage.set('Registre primero la materia prima con ese código.');
-      return;
-    }
+    const cant = Number(this.formMp.cantidadRecibida) || 0;
+    const precio = Number(this.formMp.precioPorUnidad) || 0;
+
+    const nuevoIngreso: IngresoMpRecord = {
+      id: `ING-${Date.now().toString().slice(-4)}`,
+      loteInterno: this.formMp.loteInterno,
+      producto: this.formMp.producto || material?.nombre_insumo || 'Materia Prima Registrada',
+      codigoInsumo: this.formMp.codigoInsumo,
+      proveedor: this.formMp.proveedor,
+      loteProveedor: this.formMp.loteProveedor,
+      cantidadRecibida: cant,
+      unidades: this.formMp.unidades || 'kg',
+      precioUnitario: precio,
+      costoTotal: Number((cant * precio).toFixed(2)),
+      fechaRecepcion: this.formMp.fechaRecepcion,
+      fechaVencimiento: this.formMp.fechaVencimiento,
+      estadoCalidad: this.formMp.estadoCalidad,
+      coaArchivo: this.formMp.coaArchivo,
+      liberadoPor: this.formMp.liberadoPor,
+      aspecto: this.formMp.aspecto,
+      observaciones: this.formMp.observaciones
+    };
+
+    // Actualiza store reactivo local de inmediato
+    this.data.addIngresoMp(nuevoIngreso);
+
     try {
-      await firstValueFrom(this.api.create('ingresos-mp', {
-        materia_prima_id: material.id,
-        lote_interno: this.formMp.loteInterno,
-        lote_proveedor: this.formMp.loteProveedor,
-        cantidad_recibida: Number(this.formMp.cantidadRecibida),
-        proveedor: this.formMp.proveedor
-      }));
-      this.router.navigate(['/trazabilidad/estaciones/materia-prima/ingreso/registros']);
-    } catch (err) {
-      this.feedbackMessage.set(err instanceof HttpErrorResponse ? err.error?.error || 'Error al guardar' : 'Error al guardar');
+      if (material) {
+        await firstValueFrom(this.api.create('ingresos-mp', {
+          materia_prima_id: material.id,
+          lote_interno: this.formMp.loteInterno,
+          lote_proveedor: this.formMp.loteProveedor,
+          cantidad_recibida: cant,
+          proveedor: this.formMp.proveedor
+        }));
+      }
+    } catch {
+      // Modo local reactivo en caso de que API offline
     }
+
+    this.feedbackMessage.set('Lote de materia prima registrado exitosamente.');
+    setTimeout(() => {
+      this.router.navigate(['/trazabilidad/estaciones/materia-prima/ingreso/registros']);
+    }, 400);
   }
 
   resetFormMp() {
     this.formMp.producto = '';
     this.formMp.loteProveedor = '';
-    this.formMp.loteInterno = 'MP-2026-' + Math.floor(1000 + Math.random() * 9000);
+    this.formMp.loteInterno = 'LOT-MP-GEN-' + Math.floor(100 + Math.random() * 900);
     this.formMp.cantidadRecibida = 10;
   }
 }

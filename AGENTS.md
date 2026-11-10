@@ -129,6 +129,27 @@ Consolidada en [`trazabilidad-360.component.ts`](src/app/pages/trazabilidad/esta
 
 ---
 
+## 7. Flujo Reactivo de Inventario & Control de Stock (Estándar Laprobell)
+
+Consolidado en [`mp-inventario.component.ts`](src/app/pages/trazabilidad/estaciones/materia-prima/inventario/mp-inventario.component.ts) y [`mp-consumo-formato.component.ts`](src/app/pages/trazabilidad/estaciones/materia-prima/consumo/formato/mp-consumo-formato.component.ts):
+* **Origen de Existencias (Ingreso MP):** Cada recepción técnica homologada en Ingreso de Materia Prima alimenta automáticamente el stock de bodega con su `cantidadRecibida` inicial.
+* **Deducción Dinámica (Consumo MP):** Cada vez que un operador realiza una pesada en reactor, el sistema calcula de forma instantánea:
+  $$\text{saldoDisponible} = \text{cantidadInicial} - \sum \text{realConsumidoKg}$$
+* **Regla de No-Selección de Lotes Agotados:**
+  * En el formulario de Consumo, los lotes cuyo saldo sea $\le 0$ quedan deshabilitados con el indicativo `⛔ LOTE AGOTADO (0 Kg)`, impidiendo su selección.
+  * Si el operario intenta ingresar un peso superior al saldo en bodega, la interfaz despliega una alerta de bloqueo preventivo impidiendo el guardado.
+* **Clasificación Semántica de Stock:**
+  * **Óptimo / Disponible (`DISPONIBLE`):** Remanente superior al 20% del stock inicial (`badge verde`).
+  * **Crítico / Próximo a Agotarse (`STOCK_BAJO`):** Remanente $\le 20\%$ y $> 0$ (`badge ámbar`).
+  * **Agotado (`AGOTADO`):** Remanente $\le 0$ Kg (`badge rojo / atenuado`).
+* **Kardex Analítico ("¿En qué se consumió este lote?"):**
+  * Modal interactivo que expone el historial completo de pesadas vinculadas a ese lote interno: fecha, orden de pedido comercial, producto fabricado, reactor, cantidad descontada, operador responsable y balanza calibrada.
+* **Filtros & Exportación:**
+  * Filtrado reactivo por pestañas de estado (`TODOS`, `DISPONIBLE`, `STOCK_BAJO`, `AGOTADO`) y buscador por NIT, lote del fabricante o nombre del insumo.
+  * Botón para exportar todo el libro de inventario y saldos a archivo CSV/Excel.
+
+---
+
 ## 8. Navegación, Buscador & Gestión en Barra Superior
 
 * **Navbar (`navbar.component.ts`):**

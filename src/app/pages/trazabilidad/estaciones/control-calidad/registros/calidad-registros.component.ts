@@ -247,7 +247,7 @@ import { TraceabilityDataService, CalidadRecord } from '../../../../../core/serv
 
     <!-- MODAL EDITAR CALIDAD -->
     <div class="modal-backdrop" *ngIf="editItem()" (click)="editItem.set(null)">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet modal-sheet--extra-wide" (click)="$event.stopPropagation()">
         <div class="modal-sheet-header">
           <div class="modal-title-wrap">
             <div class="modal-icon-badge" style="background: #eff6ff; color: #2563eb;">
@@ -256,30 +256,139 @@ import { TraceabilityDataService, CalidadRecord } from '../../../../../core/serv
               </svg>
             </div>
             <div>
-              <h3>Editar Registro de Calidad</h3>
-              <p>Lote: {{ editItem()?.lote }}</p>
+              <h3>Editar Registro de Calidad & Certificado COA</h3>
+              <p>Formato analítico de control de calidad — Lote: {{ editItem()?.lote }}</p>
             </div>
           </div>
           <button class="modal-close-btn" (click)="editItem.set(null)">&times;</button>
         </div>
 
         <div class="modal-body" *ngIf="editItem() as item">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Dictamen</label>
-              <select [(ngModel)]="item.dictamen" class="filter-select" style="width: 100%; margin-top: 4px; padding: 0.5rem;">
-                <option value="APROBADO / LIBERADO">APROBADO / LIBERADO</option>
-                <option value="EN CUARENTENA">EN CUARENTENA</option>
-                <option value="RECHAZADO">RECHAZADO</option>
-              </select>
+          <!-- SECCIÓN 1: IDENTIFICACIÓN DEL LOTE Y MUESTRA -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">1. Identificación del Lote y Muestra Analizada</span>
+              <span class="modal-fieldset-badge">Control BPM</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Analista QC</label>
-              <input type="text" [(ngModel)]="item.analista" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+            <div class="modal-form-grid modal-form-grid--4">
+              <div class="modal-field">
+                <label class="modal-field-label">Lote de Producto <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.lote" class="modal-field-input" placeholder="LOT-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Número de Pedido <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.numeroPedido" class="modal-field-input" placeholder="PED-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Nombre del Producto <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.nombreProducto" class="modal-field-input" placeholder="Nombre cosmético..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Marca o Línea <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.marca" class="modal-field-input" placeholder="Marca / Línea" />
+              </div>
             </div>
-            <div style="grid-column: 1 / -1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Observaciones</label>
-              <textarea [(ngModel)]="item.observaciones" rows="3" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;"></textarea>
+          </div>
+
+          <!-- SECCIÓN 2: CERTIFICADO COA Y DICTAMEN -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">2. Certificado COA, Dictamen y Responsables</span>
+              <span class="modal-fieldset-badge" [style.color]="item.dictamen === 'APROBADO / LIBERADO' ? '#16a34a' : item.dictamen === 'EN CUARENTENA' ? '#d97706' : '#dc2626'">
+                {{ item.dictamen }}
+              </span>
+            </div>
+            <div class="modal-form-grid modal-form-grid--3">
+              <div class="modal-field">
+                <label class="modal-field-label">Número de COA <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.numeroCoa" class="modal-field-input" placeholder="COA-2026-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Tipo de Muestra <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.tipoMuestra" class="modal-field-input" placeholder="Granel, producto envasado..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Fecha de Análisis <span class="req">*</span></label>
+                <input type="date" [(ngModel)]="item.fecha" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Dictamen de Calidad <span class="req">*</span></label>
+                <select [(ngModel)]="item.dictamen" class="modal-field-select">
+                  <option value="APROBADO / LIBERADO">APROBADO / LIBERADO</option>
+                  <option value="EN CUARENTENA">EN CUARENTENA</option>
+                  <option value="RECHAZADO">RECHAZADO</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Analista QC Responsable <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.analista" class="modal-field-input" placeholder="Dra. / Dr. Analista" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Dirección Técnica / Firma <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.firmadoPor" class="modal-field-input" placeholder="Director(a) Técnico(a)" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: PARÁMETROS FISICOQUÍMICOS Y MICROBIOLÓGICOS -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">3. Parámetros Fisicoquímicos y Microbiológicos</span>
+              <button type="button" class="btn-sub-add" (click)="agregarParametro()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Agregar Parámetro</span>
+              </button>
+            </div>
+
+            <div class="modal-table-editable-wrap">
+              <table class="modal-table-editable">
+                <thead>
+                  <tr>
+                    <th style="min-width: 200px;">Parámetro Analizado</th>
+                    <th style="min-width: 180px;">Especificación Oficial</th>
+                    <th style="min-width: 150px;">Resultado de Laboratorio</th>
+                    <th style="width: 120px; text-align: center;">Cumple (Conforme)</th>
+                    <th style="width: 45px; text-align: center;">Quitar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of item.parametros; let i = index">
+                    <td>
+                      <input type="text" [(ngModel)]="p.parametro" class="modal-table-input" placeholder="Ej: pH a 25°C, Densidad..." />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="p.especificacion" class="modal-table-input" placeholder="Ej: 5.50 - 6.50" />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="p.resultado" class="modal-table-input" placeholder="Resultado obtenido" style="font-weight: 700;" />
+                    </td>
+                    <td style="text-align: center;">
+                      <select [(ngModel)]="p.cumple" class="modal-table-select" style="text-align: center; font-weight: 700;">
+                        <option [ngValue]="true">✓ Cumple</option>
+                        <option [ngValue]="false">✗ No cumple</option>
+                      </select>
+                    </td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn-icon-delete-row" (click)="eliminarParametro(i)" title="Eliminar fila" [disabled]="item.parametros.length <= 1">
+                        &times;
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: OBSERVACIONES -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">4. Observaciones y Conclusiones del Dictamen</span>
+            </div>
+            <div class="modal-field">
+              <textarea [(ngModel)]="item.observaciones" rows="3" class="modal-field-textarea" placeholder="Justificación técnica, condiciones especiales de liberación para envasado o despacho..."></textarea>
             </div>
           </div>
         </div>
@@ -354,7 +463,32 @@ export class CalidadRegistrosComponent {
   }
 
   editarRegistro(item: CalidadRecord) {
-    this.editItem.set({ ...item });
+    this.editItem.set({
+      ...item,
+      parametros: (item.parametros || []).map(p => ({ ...p }))
+    });
+  }
+
+  agregarParametro() {
+    const item = this.editItem();
+    if (item) {
+      item.parametros = [
+        ...(item.parametros || []),
+        {
+          parametro: '',
+          especificacion: '',
+          resultado: '',
+          cumple: true
+        }
+      ];
+    }
+  }
+
+  eliminarParametro(index: number) {
+    const item = this.editItem();
+    if (item && item.parametros && item.parametros.length > 1) {
+      item.parametros = item.parametros.filter((_, i) => i !== index);
+    }
   }
 
   guardarEdicion() {

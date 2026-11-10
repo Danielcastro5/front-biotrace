@@ -27,24 +27,30 @@ interface PreguntaDespeje {
   template: `
     <div class="page-container">
       <!-- HEADER CON ACCESO A REGISTROS -->
-      <div class="page-header">
-        <div class="header-left">
-          <div class="header-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <header class="station-header">
+        <div class="station-header-main">
+          <div class="station-badge-icon station-badge-icon--purple">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
               <polyline points="2 17 12 22 22 17"></polyline>
               <polyline points="2 12 12 17 22 12"></polyline>
             </svg>
-            <span>ESTACIÓN DE FABRICACIÓN • GMP/BPM</span>
           </div>
-          <h1 class="header-title">Fabricación del Producto</h1>
-          <p class="header-desc">
-            Llenado de registro de manufactura: despeje de línea, control de variables (RPM, tiempo, temperatura) y firmas técnicas.
-          </p>
+          <div class="station-header-text">
+            <div class="station-tag-row">
+              <span class="station-code-badge">EST-FAB-01</span>
+              <span class="station-domain-badge">Dermo-Pharma GMP</span>
+              <span class="station-cat-badge">Manufactura & Reactores</span>
+            </div>
+            <h1 class="station-title">Fabricación del Producto — Llenar Formato</h1>
+            <p class="station-desc">
+              Registro de manufactura: despeje de línea 7/7, control de variables (RPM, tiempo, temperatura) y firmas técnicas.
+            </p>
+          </div>
         </div>
 
-        <div class="header-right">
-          <a routerLink="/trazabilidad/estaciones/fabricacion/registros" class="btn btn-outline">
+        <div class="station-header-actions">
+          <a routerLink="/trazabilidad/estaciones/fabricacion/registros" class="btn btn-secondary">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
@@ -52,10 +58,10 @@ interface PreguntaDespeje {
             <span>Ver registros de fabricación</span>
           </a>
         </div>
-      </div>
+      </header>
 
       <!-- ALERTA DE ÉXITO -->
-      <div *ngIf="successMessage()" class="alert alert--success">
+      <div *ngIf="successMessage()" class="alert-box alert--success">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
@@ -66,7 +72,7 @@ interface PreguntaDespeje {
       </div>
 
       <!-- FORMULARIO DE FABRICACIÓN -->
-      <form (ngSubmit)="guardarFabricacion()" class="form-layout">
+      <form (ngSubmit)="guardarFabricacion()" class="form-flow">
         
         <!-- SECCIÓN 1: DESPEJE DE LÍNEA (7 PREGUNTAS BPM) -->
         <div class="card form-card">
@@ -127,23 +133,33 @@ interface PreguntaDespeje {
 
           <div class="inputs-grid">
             <div class="form-group">
-              <label>Número de Lote de Producto *</label>
-              <input type="text" [(ngModel)]="formData.lote" name="lote" required placeholder="Ej: LOT-GAL-2026-088" class="form-input" />
+              <label>Vincular Orden de Pedido Comercial</label>
+              <select [(ngModel)]="formData.numeroPedido" name="numeroPedido" (change)="onPedidoChange()" class="form-select font-bold">
+                <option value="">-- Sin vincular / Entrada Manual --</option>
+                <option *ngFor="let ped of data.pedidos()" [value]="ped.numeroPedido">
+                  {{ ped.numeroPedido }} • {{ ped.clienteNombre }} ({{ ped.productoNombre }})
+                </option>
+              </select>
             </div>
 
             <div class="form-group">
-              <label>Nombre del Producto *</label>
-              <input type="text" [(ngModel)]="formData.nombreProducto" name="nombreProducto" required placeholder="Ej: Sérum Facial Ácido Hialurónico 2%" class="form-input" />
+              <label>Número de Lote de Producto <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.lote" name="lote" required placeholder="Ej: LOT-GAL-2026-088" class="form-input font-mono font-bold" />
             </div>
 
             <div class="form-group">
-              <label>Marca o Línea *</label>
+              <label>Nombre del Producto <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.nombreProducto" name="nombreProducto" required placeholder="Ej: Sérum Facial Ácido Hialurónico 2%" class="form-input font-bold" />
+            </div>
+
+            <div class="form-group">
+              <label>Marca o Línea <span class="req-star">*</span></label>
               <input type="text" [(ngModel)]="formData.marca" name="marca" required placeholder="Ej: BioTrace Derma" class="form-input" />
             </div>
 
             <div class="form-group">
-              <label>Reactor / Marmita *</label>
-              <select [(ngModel)]="formData.reactor" name="reactor" class="form-select">
+              <label>Reactor / Marmita <span class="req-star">*</span></label>
+              <select [(ngModel)]="formData.reactor" name="reactor" class="form-select" required>
                 <option value="Reactor R-101 (Inox 500L)">Reactor R-101 (Inox 500L)</option>
                 <option value="Reactor R-102 (Inox 250L)">Reactor R-102 (Inox 250L)</option>
                 <option value="Marmita Calefactora M-01 (100L)">Marmita Calefactora M-01 (100L)</option>
@@ -152,12 +168,12 @@ interface PreguntaDespeje {
             </div>
 
             <div class="form-group">
-              <label>Tamaño del Lote (Kg / L) *</label>
-              <input type="number" [(ngModel)]="formData.tamanoLote" name="tamanoLote" required placeholder="250" class="form-input" />
+              <label>Tamaño del Lote (Kg / L) <span class="req-star">*</span></label>
+              <input type="number" [(ngModel)]="formData.tamanoLote" name="tamanoLote" required placeholder="250" class="form-input font-bold" style="color: #0891b2;" />
             </div>
 
             <div class="form-group">
-              <label>Fecha de Fabricación *</label>
+              <label>Fecha de Fabricación <span class="req-star">*</span></label>
               <input type="date" [(ngModel)]="formData.fecha" name="fecha" required class="form-input" />
             </div>
           </div>
@@ -181,7 +197,7 @@ interface PreguntaDespeje {
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
-              <span>Agregar Paso</span>
+              <span>+ Agregar Paso</span>
             </button>
           </div>
 
@@ -189,18 +205,18 @@ interface PreguntaDespeje {
             <table class="pasos-table">
               <thead>
                 <tr>
-                  <th style="width: 70px;">Paso</th>
-                  <th>Procedimiento Detallado</th>
-                  <th style="width: 110px;">RPM</th>
-                  <th style="width: 110px;">Tiempo</th>
-                  <th style="width: 120px;">Temperatura</th>
-                  <th style="width: 140px;">Realizado Por</th>
-                  <th style="width: 60px;"></th>
+                  <th style="width: 60px; text-align: center;">Paso</th>
+                  <th style="min-width: 280px;">Procedimiento Detallado *</th>
+                  <th style="min-width: 130px; text-align: center;">RPM Agitación</th>
+                  <th style="min-width: 120px; text-align: center;">Tiempo</th>
+                  <th style="min-width: 130px; text-align: center;">Temperatura</th>
+                  <th style="min-width: 160px;">Realizado Por</th>
+                  <th style="width: 50px;"></th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let p of pasos; let i = index">
-                  <td class="text-center font-bold">#{{ p.pasoNumero }}</td>
+                  <td class="text-center font-bold" style="color: #0891b2; font-size: 0.95rem;">#{{ p.pasoNumero }}</td>
                   <td>
                     <textarea
                       [(ngModel)]="p.procedimiento"
@@ -208,19 +224,20 @@ interface PreguntaDespeje {
                       rows="2"
                       class="step-textarea"
                       placeholder="Descripción de la adición de ingredientes o agitación..."
+                      required
                     ></textarea>
                   </td>
                   <td>
-                    <input type="text" [(ngModel)]="p.rpm" [name]="'rpm_' + i" placeholder="400 RPM" class="step-input" />
+                    <input type="text" [(ngModel)]="p.rpm" [name]="'rpm_' + i" placeholder="400 RPM" class="step-input text-center" />
                   </td>
                   <td>
-                    <input type="text" [(ngModel)]="p.tiempo" [name]="'tiempo_' + i" placeholder="20 min" class="step-input" />
+                    <input type="text" [(ngModel)]="p.tiempo" [name]="'tiempo_' + i" placeholder="20 min" class="step-input text-center" />
                   </td>
                   <td>
-                    <input type="text" [(ngModel)]="p.temperatura" [name]="'temp_' + i" placeholder="Ambiente / 65°C" class="step-input" />
+                    <input type="text" [(ngModel)]="p.temperatura" [name]="'temp_' + i" placeholder="Ambiente / 65°C" class="step-input text-center" />
                   </td>
                   <td>
-                    <input type="text" [(ngModel)]="p.realizadoPor" [name]="'operador_' + i" placeholder="Operario" class="step-input" />
+                    <input type="text" [(ngModel)]="p.realizadoPor" [name]="'operador_' + i" placeholder="Operario de turno" class="step-input" />
                   </td>
                   <td class="text-center">
                     <button
@@ -256,13 +273,13 @@ interface PreguntaDespeje {
 
           <div class="inputs-grid">
             <div class="form-group">
-              <label>Operador Responsable de Fabricación *</label>
-              <input type="text" [(ngModel)]="formData.operadorResponsable" name="operadorResponsable" required class="form-input" />
+              <label>Operador Responsable de Fabricación <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.operadorResponsable" name="operadorResponsable" required class="form-input font-bold" />
             </div>
 
             <div class="form-group">
-              <label>Supervisor de Planta *</label>
-              <input type="text" [(ngModel)]="formData.supervisor" name="supervisor" placeholder="Ing. Químico de Turno" class="form-input" />
+              <label>Supervisor de Planta <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.supervisor" name="supervisor" placeholder="Ing. Químico de Turno" class="form-input font-bold" required />
             </div>
 
             <div class="form-group full-width">
@@ -295,51 +312,9 @@ interface PreguntaDespeje {
       </form>
     </div>
   `,
+  styleUrls: ['../../../../../shared/styles/registros-common.css'],
   styles: [`
-    .page-container {
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-      padding: 1.25rem 2rem 3rem 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      box-sizing: border-box;
-    }
-    .page-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .header-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      background: #faf5ff;
-      border: 1px solid #e9d5ff;
-      color: #7e22ce;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      margin-bottom: 0.5rem;
-    }
-    .header-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0 0 0.35rem 0;
-      letter-spacing: -0.02em;
-    }
-    .header-desc {
-      font-size: 0.88rem;
-      color: #64748b;
-      margin: 0;
-    }
-    .form-layout {
+    .form-flow {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
@@ -348,7 +323,7 @@ interface PreguntaDespeje {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 16px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
       overflow: hidden;
     }
     .card-header {
@@ -399,13 +374,13 @@ interface PreguntaDespeje {
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      padding: 0.65rem 0.85rem;
+      padding: 0.75rem 1rem;
       background: #f8fafc;
       border-radius: 10px;
       border: 1px solid #f1f5f9;
     }
     .checklist-text {
-      font-size: 0.825rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: #1e293b;
     }
@@ -416,8 +391,8 @@ interface PreguntaDespeje {
       border: 1px solid #cbd5e1;
     }
     .toggle-btn {
-      padding: 4px 10px;
-      font-size: 0.72rem;
+      padding: 5px 12px;
+      font-size: 0.75rem;
       font-weight: 700;
       border: none;
       background: #ffffff;
@@ -444,7 +419,7 @@ interface PreguntaDespeje {
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
     .full-width {
       grid-column: 1 / -1;
@@ -454,13 +429,17 @@ interface PreguntaDespeje {
       font-weight: 700;
       color: #334155;
     }
+    .req-star {
+      color: #dc2626;
+    }
     .form-input, .form-select, .form-textarea {
       width: 100%;
       padding: 0.65rem 0.85rem;
       border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      font-size: 0.85rem;
+      border: 1.5px solid #cbd5e1;
+      font-size: 0.875rem;
       color: #0f172a;
+      background: #ffffff;
       outline: none;
       box-sizing: border-box;
       transition: all 0.15s ease;
@@ -478,51 +457,58 @@ interface PreguntaDespeje {
     .pasos-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.825rem;
+      font-size: 0.85rem;
     }
     .pasos-table th {
       background: #f8fafc;
-      padding: 0.75rem 0.85rem;
+      padding: 0.8rem 1rem;
       text-align: left;
       font-weight: 700;
       color: #475569;
       border-bottom: 1.5px solid #e2e8f0;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
     .pasos-table td {
-      padding: 0.65rem 0.85rem;
+      padding: 0.75rem 1rem;
       border-bottom: 1px solid #f1f5f9;
       vertical-align: middle;
     }
     .step-textarea {
       width: 100%;
-      padding: 0.45rem 0.65rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.8rem;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #0f172a;
       outline: none;
       box-sizing: border-box;
+      resize: vertical;
     }
     .step-input {
       width: 100%;
-      padding: 0.45rem 0.65rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.8rem;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #0f172a;
       outline: none;
       box-sizing: border-box;
     }
     .step-textarea:focus, .step-input:focus {
       border-color: #9333ea;
+      box-shadow: 0 0 0 2px rgba(147, 51, 234, 0.15);
     }
     .btn-delete-row {
       background: none;
       border: none;
-      color: #ef4444;
+      color: #dc2626;
       font-size: 1.3rem;
       cursor: pointer;
       line-height: 1;
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 4px 8px;
+      border-radius: 6px;
     }
     .btn-delete-row:hover {
       background: #fee2e2;
@@ -536,48 +522,7 @@ interface PreguntaDespeje {
       gap: 1rem;
       padding-top: 0.5rem;
     }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0.65rem 1.4rem;
-      border-radius: 9px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.15s ease;
-    }
-    .btn-sm {
-      padding: 0.4rem 0.85rem;
-      font-size: 0.78rem;
-    }
-    .btn-primary {
-      background: #0891b2;
-      color: #ffffff;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: #0e7490;
-    }
-    .btn-secondary {
-      background: #ffffff;
-      border-color: #cbd5e1;
-      color: #475569;
-    }
-    .btn-secondary:hover {
-      background: #f1f5f9;
-    }
-    .btn-outline {
-      background: #ffffff;
-      border-color: #e2e8f0;
-      color: #0f172a;
-    }
-    .btn-outline:hover {
-      background: #f8fafc;
-      border-color: #cbd5e1;
-    }
-    .alert {
+    .alert-box {
       display: flex;
       align-items: center;
       gap: 1rem;
@@ -592,6 +537,7 @@ interface PreguntaDespeje {
     }
     .text-center { text-align: center; }
     .font-bold { font-weight: 700; }
+    .font-mono { font-family: monospace; }
   `]
 })
 export class FabricacionFormatoComponent implements OnInit {
@@ -613,42 +559,26 @@ export class FabricacionFormatoComponent implements OnInit {
   ];
 
   formData = {
-    numeroPedido: 'PED-2026-001',
-    lote: 'LOT-SH-2026-001',
-    nombreProducto: 'Sérum Facial Ácido Hialurónico 2%',
-    marca: 'BioTrace Derma Care',
+    numeroPedido: '',
+    lote: '',
+    nombreProducto: '',
+    marca: 'BioTrace',
     reactor: 'Reactor R-101 (Inox 500L)',
-    tamanoLote: 150,
+    tamanoLote: 0,
     fecha: new Date().toISOString().split('T')[0],
-    operadorResponsable: this.auth.currentUser()?.name || 'Carlos Mendoza',
-    supervisor: 'Ing. Químico de Planta',
-    observaciones: 'Control de agitación y temperatura constante. Muestra enviada a control de calidad.'
+    operadorResponsable: this.auth.currentUser()?.name || '',
+    supervisor: '',
+    observaciones: ''
   };
 
   pasos: PasoFabricacion[] = [
     {
       pasoNumero: 1,
-      procedimiento: 'Adicionar agua desionizada purificada e iniciar agitación suave constante.',
+      procedimiento: 'Carga de vehículo principal e inicio de agitación controlada.',
       rpm: '350 RPM',
       tiempo: '15 min',
       temperatura: '22°C',
-      realizadoPor: 'Carlos M.'
-    },
-    {
-      pasoNumero: 2,
-      procedimiento: 'Incorporar polímero espesante poco a poco hasta completa hidratación sin grumos.',
-      rpm: '900 RPM',
-      tiempo: '25 min',
-      temperatura: '22°C',
-      realizadoPor: 'Carlos M.'
-    },
-    {
-      pasoNumero: 3,
-      procedimiento: 'Incorporación de Ácido Hialurónico y Glicerina en frío hasta homogenización.',
-      rpm: '600 RPM',
-      tiempo: '20 min',
-      temperatura: '23°C',
-      realizadoPor: 'Carlos M.'
+      realizadoPor: this.auth.currentUser()?.name || 'Operador de Planta'
     }
   ];
 
@@ -656,8 +586,17 @@ export class FabricacionFormatoComponent implements OnInit {
     const peds = this.data.pedidos();
     if (peds.length > 0) {
       this.formData.numeroPedido = peds[0].numeroPedido;
-      this.formData.lote = peds[0].loteAsignado;
-      this.formData.nombreProducto = peds[0].productoNombre;
+      this.onPedidoChange();
+    }
+  }
+
+  onPedidoChange() {
+    if (!this.formData.numeroPedido) return;
+    const ped = this.data.pedidos().find(p => p.numeroPedido === this.formData.numeroPedido);
+    if (ped) {
+      this.formData.lote = ped.loteAsignado;
+      this.formData.nombreProducto = ped.productoNombre;
+      this.formData.tamanoLote = ped.tamanoLoteKg;
     }
   }
 
@@ -684,7 +623,7 @@ export class FabricacionFormatoComponent implements OnInit {
     const nuevoFab: FabricacionRecord = {
       id: `FAB-${Date.now().toString().slice(-4)}`,
       lote: this.formData.lote,
-      numeroPedido: this.formData.numeroPedido,
+      numeroPedido: this.formData.numeroPedido || 'PED-MANUAL',
       nombreProducto: this.formData.nombreProducto,
       marca: this.formData.marca,
       reactor: this.formData.reactor,
@@ -709,4 +648,3 @@ export class FabricacionFormatoComponent implements OnInit {
     }, 700);
   }
 }
-

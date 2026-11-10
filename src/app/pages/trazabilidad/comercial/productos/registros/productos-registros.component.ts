@@ -212,7 +212,7 @@ import { TraceabilityDataService, ProductoRecord } from '../../../../../core/ser
 
     <!-- MODAL EDITAR PRODUCTO -->
     <div class="modal-backdrop" *ngIf="editItem()" (click)="editItem.set(null)">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet modal-sheet--extra-wide" (click)="$event.stopPropagation()">
         <div class="modal-sheet-header">
           <div class="modal-title-wrap">
             <div class="modal-icon-badge" style="background: #eff6ff; color: #2563eb;">
@@ -221,33 +221,118 @@ import { TraceabilityDataService, ProductoRecord } from '../../../../../core/ser
               </svg>
             </div>
             <div>
-              <h3>Editar Producto Cosmético</h3>
-              <p>{{ editItem()?.nombre }}</p>
+              <h3>Editar Producto Cosmético & Fórmula Maestra</h3>
+              <p>Formato galénico de especificación de producto — {{ editItem()?.nombre }}</p>
             </div>
           </div>
           <button class="modal-close-btn" (click)="editItem.set(null)">&times;</button>
         </div>
 
         <div class="modal-body" *ngIf="editItem() as item">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Nombre Comercial</label>
-              <input type="text" [(ngModel)]="item.nombre" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          <!-- SECCIÓN 1: IDENTIFICACIÓN Y REGISTRO SANITARIO -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">1. Ficha Técnica & Registro INVIMA</span>
+              <span class="modal-fieldset-badge">{{ item.estado }}</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Presentación</label>
-              <input type="text" [(ngModel)]="item.presentacion" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+            <div class="modal-form-grid modal-form-grid--4">
+              <div class="modal-field">
+                <label class="modal-field-label">Código Único de Producto <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.codigo" class="modal-field-input" placeholder="PRD-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Nombre Comercial del Producto <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.nombre" class="modal-field-input" placeholder="Nombre completo" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Línea Cosmética <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.linea" class="modal-field-input" placeholder="Línea dermatológica" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Presentación Comercial <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.presentacion" class="modal-field-input" placeholder="Frasco x 30ml, pote..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Registro Sanitario INVIMA <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.registroInvima" class="modal-field-input" placeholder="NSOC..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Tamaño Lote Estándar (Kg) <span class="req">*</span></label>
+                <input type="number" [(ngModel)]="item.tamanoLoteEstandar" (ngModelChange)="recalcularCantidadesFormula()" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Estado de Catálogo <span class="req">*</span></label>
+                <select [(ngModel)]="item.estado" class="modal-field-select">
+                  <option value="Activo">Activo</option>
+                  <option value="En revisión">En revisión</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Lote Estándar (Kg)</label>
-              <input type="number" [(ngModel)]="item.tamanoLoteEstandar" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          </div>
+
+          <!-- SECCIÓN 2: FÓRMULA MAESTRA CUALICUANTITATIVA -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">2. Composición Cualicuantitativa (Fórmula Maestra)</span>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="modal-fieldset-badge" [style.color]="totalPorcentaje() === 100 ? '#16a34a' : '#d97706'">
+                  Total: {{ totalPorcentaje() }}% {{ totalPorcentaje() === 100 ? '(100% Equilibrado)' : '(Verificar suma)' }}
+                </span>
+                <button type="button" class="btn-sub-add" (click)="agregarIngrediente()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Agregar Principio / Insumo</span>
+                </button>
+              </div>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Estado</label>
-              <select [(ngModel)]="item.estado" class="filter-select" style="width: 100%; margin-top: 4px; padding: 0.5rem;">
-                <option value="Activo">Activo</option>
-                <option value="En revisión">En revisión</option>
-              </select>
+
+            <div class="modal-table-editable-wrap">
+              <table class="modal-table-editable">
+                <thead>
+                  <tr>
+                    <th style="width: 120px;">Código MP</th>
+                    <th style="min-width: 220px;">Principio Activo / Materia Prima</th>
+                    <th style="width: 130px;">Lote Sugerido</th>
+                    <th style="width: 90px; text-align: right;">% Teórico</th>
+                    <th style="width: 110px; text-align: right;">Cant. Lote (Kg)</th>
+                    <th style="width: 75px;">Unidad</th>
+                    <th style="width: 45px; text-align: center;">Quitar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let f of item.formula; let i = index">
+                    <td>
+                      <input type="text" [(ngModel)]="f.codigoMateriaPrima" class="modal-table-input" placeholder="MP-..." />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="f.nombreMateriaPrima" class="modal-table-input" placeholder="Nombre de insumo" />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="f.loteSugerido" class="modal-table-input" placeholder="LOT-MP-..." />
+                    </td>
+                    <td>
+                      <input type="number" step="0.1" [(ngModel)]="f.porcentaje" (ngModelChange)="recalcularCantidadesFormula()" class="modal-table-input" style="text-align: right;" />
+                    </td>
+                    <td>
+                      <input type="number" step="0.01" [(ngModel)]="f.cantidadPorLote" class="modal-table-input" style="text-align: right; font-weight: 700; color: #0891b2;" />
+                    </td>
+                    <td>
+                      <select [(ngModel)]="f.unidad" class="modal-table-select">
+                        <option value="Kg">Kg</option>
+                        <option value="L">L</option>
+                        <option value="g">g</option>
+                      </select>
+                    </td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn-icon-delete-row" (click)="eliminarIngrediente(i)" title="Eliminar insumo" [disabled]="item.formula.length <= 1">
+                        &times;
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -317,7 +402,50 @@ export class ProductosRegistrosComponent {
   }
 
   editarRegistro(item: ProductoRecord) {
-    this.editItem.set({ ...item });
+    this.editItem.set({
+      ...item,
+      formula: (item.formula || []).map(f => ({ ...f }))
+    });
+  }
+
+  totalPorcentaje(): number {
+    const item = this.editItem();
+    if (!item || !item.formula) return 0;
+    return Number(item.formula.reduce((sum, f) => sum + (Number(f.porcentaje) || 0), 0).toFixed(2));
+  }
+
+  recalcularCantidadesFormula() {
+    const item = this.editItem();
+    if (item && item.formula) {
+      const totalKg = Number(item.tamanoLoteEstandar) || 0;
+      for (const f of item.formula) {
+        f.cantidadPorLote = Number(((Number(f.porcentaje) || 0) / 100 * totalKg).toFixed(2));
+      }
+    }
+  }
+
+  agregarIngrediente() {
+    const item = this.editItem();
+    if (item) {
+      item.formula = [
+        ...(item.formula || []),
+        {
+          codigoMateriaPrima: '',
+          nombreMateriaPrima: '',
+          loteSugerido: '',
+          porcentaje: 0,
+          cantidadPorLote: 0,
+          unidad: 'Kg'
+        }
+      ];
+    }
+  }
+
+  eliminarIngrediente(index: number) {
+    const item = this.editItem();
+    if (item && item.formula && item.formula.length > 1) {
+      item.formula = item.formula.filter((_, i) => i !== index);
+    }
   }
 
   guardarEdicion() {

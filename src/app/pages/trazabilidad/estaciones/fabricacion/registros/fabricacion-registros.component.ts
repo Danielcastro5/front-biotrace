@@ -243,7 +243,7 @@ import { TraceabilityDataService, FabricacionRecord } from '../../../../../core/
 
     <!-- MODAL EDITAR FABRICACIÓN -->
     <div class="modal-backdrop" *ngIf="editItem()" (click)="editItem.set(null)">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet modal-sheet--extra-wide" (click)="$event.stopPropagation()">
         <div class="modal-sheet-header">
           <div class="modal-title-wrap">
             <div class="modal-icon-badge" style="background: #eff6ff; color: #2563eb;">
@@ -253,25 +253,145 @@ import { TraceabilityDataService, FabricacionRecord } from '../../../../../core/
             </div>
             <div>
               <h3>Editar Orden de Fabricación</h3>
-              <p>Lote: {{ editItem()?.lote }}</p>
+              <p>Formato completo de manufactura y agitación — Lote: {{ editItem()?.lote }}</p>
             </div>
           </div>
           <button class="modal-close-btn" (click)="editItem.set(null)">&times;</button>
         </div>
 
         <div class="modal-body" *ngIf="editItem() as item">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Reactor</label>
-              <input type="text" [(ngModel)]="item.reactor" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          <!-- SECCIÓN 1: IDENTIFICACIÓN DEL LOTE Y PRODUCTO -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">1. Identificación del Lote & Orden de Producción</span>
+              <span class="modal-fieldset-badge">Fórmula Galénica</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Operador</label>
-              <input type="text" [(ngModel)]="item.operador" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+            <div class="modal-form-grid modal-form-grid--4">
+              <div class="modal-field">
+                <label class="modal-field-label">Lote de Producto <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.lote" class="modal-field-input" placeholder="LOT-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Número de Pedido <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.numeroPedido" class="modal-field-input" placeholder="PED-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Nombre del Producto <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.nombreProducto" class="modal-field-input" placeholder="Ej: Sérum Facial..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Marca o Línea <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.marca" class="modal-field-input" placeholder="Ej: BioTrace Derma..." />
+              </div>
             </div>
-            <div style="grid-column: 1 / -1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Observaciones</label>
-              <textarea [(ngModel)]="item.observaciones" rows="3" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;"></textarea>
+          </div>
+
+          <!-- SECCIÓN 2: EQUIPO, CAPACIDAD Y DESPEJE -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">2. Equipo, Tamaño de Lote y Verificación BPM</span>
+              <span class="modal-fieldset-badge">Despeje de Línea</span>
+            </div>
+            <div class="modal-form-grid modal-form-grid--4">
+              <div class="modal-field">
+                <label class="modal-field-label">Reactor / Marmita <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.reactor" class="modal-field-input" placeholder="Reactor R-101 / Marmita..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Tamaño Lote (Kg / L) <span class="req">*</span></label>
+                <input type="number" [(ngModel)]="item.tamanoLoteKg" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Fecha de Fabricación <span class="req">*</span></label>
+                <input type="date" [(ngModel)]="item.fecha" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Despeje de Línea BPM <span class="req">*</span></label>
+                <select [(ngModel)]="item.despejeConforme" class="modal-field-select">
+                  <option [ngValue]="true">Conforme (7/7 Ítems)</option>
+                  <option [ngValue]="false">No Conforme (Pendiente)</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Operador Responsable <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.operador" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Supervisor Técnico <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.supervisor" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Estado de la Orden <span class="req">*</span></label>
+                <select [(ngModel)]="item.estado" class="modal-field-select">
+                  <option value="Completado">Completado</option>
+                  <option value="En Proceso">En Proceso</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: FASES Y PARÁMETROS DE MEZCLA -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">3. Fases del Proceso y Parámetros Operativos</span>
+              <button type="button" class="btn-sub-add" (click)="agregarPaso()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Agregar Fase / Paso</span>
+              </button>
+            </div>
+
+            <div class="modal-table-editable-wrap">
+              <table class="modal-table-editable">
+                <thead>
+                  <tr>
+                    <th style="width: 60px;">Paso</th>
+                    <th style="min-width: 250px;">Procedimiento Detallado</th>
+                    <th style="width: 120px;">RPM</th>
+                    <th style="width: 110px;">Tiempo</th>
+                    <th style="width: 120px;">Temperatura</th>
+                    <th style="width: 130px;">Realizado Por</th>
+                    <th style="width: 45px; text-align: center;">Quitar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of item.pasos; let i = index">
+                    <td style="font-weight: 800; color: #0891b2; text-align: center;">#{{ p.pasoNumero }}</td>
+                    <td>
+                      <input type="text" [(ngModel)]="p.procedimiento" class="modal-table-input" placeholder="Descripción de la fase..." />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="p.rpm" class="modal-table-input" placeholder="Ej: 350 RPM" />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="p.tiempo" class="modal-table-input" placeholder="Ej: 20 min" />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="p.temperatura" class="modal-table-input" placeholder="Ej: 65°C" />
+                    </td>
+                    <td>
+                      <input type="text" [(ngModel)]="p.realizadoPor" class="modal-table-input" placeholder="Operador" />
+                    </td>
+                    <td style="text-align: center;">
+                      <button type="button" class="btn-icon-delete-row" (click)="eliminarPaso(i)" title="Eliminar fase" [disabled]="item.pasos.length <= 1">
+                        &times;
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 4: OBSERVACIONES -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">4. Observaciones Técnicas y Cierre de Lote</span>
+            </div>
+            <div class="modal-field">
+              <textarea [(ngModel)]="item.observaciones" rows="3" class="modal-field-textarea" placeholder="Rendimiento del lote, apariencia organoléptica tras enfriamiento..."></textarea>
             </div>
           </div>
         </div>
@@ -345,7 +465,39 @@ export class FabricacionRegistrosComponent {
   }
 
   editarRegistro(item: FabricacionRecord) {
-    this.editItem.set({ ...item });
+    this.editItem.set({
+      ...item,
+      pasos: (item.pasos || []).map(p => ({ ...p }))
+    });
+  }
+
+  agregarPaso() {
+    const item = this.editItem();
+    if (item) {
+      const nextNum = (item.pasos?.length || 0) + 1;
+      item.pasos = [
+        ...(item.pasos || []),
+        {
+          pasoNumero: nextNum,
+          procedimiento: '',
+          rpm: '300 RPM',
+          tiempo: '15 min',
+          temperatura: 'Ambiente (22°C)',
+          realizadoPor: item.operador || 'Operador Planta'
+        }
+      ];
+      item.totalPasos = item.pasos.length;
+    }
+  }
+
+  eliminarPaso(index: number) {
+    const item = this.editItem();
+    if (item && item.pasos && item.pasos.length > 1) {
+      item.pasos = item.pasos
+        .filter((_, i) => i !== index)
+        .map((p, idx) => ({ ...p, pasoNumero: idx + 1 }));
+      item.totalPasos = item.pasos.length;
+    }
   }
 
   guardarEdicion() {

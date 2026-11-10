@@ -687,3 +687,218 @@
   margin-top: 0.5rem;
 }
 
+/* ======================================================== */
+/* ESTILOS AVANZADOS PARA FORMULARIOS EN MODALES DE EDICIÓN */
+/* ======================================================== */
+.modal-sheet--extra-wide {
+  max-width: 1040px;
+}
+
+.modal-fieldset {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modal-fieldset-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.modal-fieldset-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.modal-fieldset-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  background: #ecfeff;
+  color: #0891b2;
+}
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem 1rem;
+}
+
+.modal-form-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.modal-form-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.modal-form-grid--full {
+  grid-column: 1 / -1;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.modal-field-label {
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.modal-field-label .req {
+  color: #0891b2;
+}
+
+.modal-field-input,
+.modal-field-select,
+.modal-field-textarea {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.825rem;
+  color: #0f172a;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.modal-field-input:focus,
+.modal-field-select:focus,
+.modal-field-textarea:focus {
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+  background: #ffffff;
+}
+
+.modal-field-input:disabled {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.modal-field-textarea {
+  resize: vertical;
+  min-height: 65px;
+  font-family: inherit;
+}
+
+/* TABLA EDITABLE DENTRO DE MODALES (FÓRMULAS, PASOS, DETALLES) */
+.modal-table-editable-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.modal-table-editable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.modal-table-editable th {
+  background: #f1f5f9;
+  padding: 0.6rem 0.75rem;
+  font-weight: 700;
+  color: #334155;
+  text-align: left;
+  border-bottom: 1.5px solid #cbd5e1;
+  white-space: nowrap;
+}
+
+.modal-table-editable td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.modal-table-input,
+.modal-table-select {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.78rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.modal-table-input:focus,
+.modal-table-select:focus {
+  border-color: #06b6d4;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+}
+
+.btn-sub-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0891b2;
+  background: #ecfeff;
+  border: 1px dashed #06b6d4;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-sub-add:hover {
+  background: #0891b2;
+  color: #ffffff;
+}
+
+.btn-icon-delete-row {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-icon-delete-row:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .modal-form-grid,
+  .modal-form-grid--3,
+  .modal-form-grid--4 {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -19,23 +19,29 @@ interface ParametroCalidad {
   template: `
     <div class="page-container">
       <!-- HEADER -->
-      <div class="page-header">
-        <div class="header-left">
-          <div class="header-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <header class="station-header">
+        <div class="station-header-main">
+          <div class="station-badge-icon station-badge-icon--cyan">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               <polyline points="9 12 11 14 15 10"></polyline>
             </svg>
-            <span>CONTROL DE CALIDAD • LABORATORIO QC/QA</span>
           </div>
-          <h1 class="header-title">Control de Calidad (Llenar Formato)</h1>
-          <p class="header-desc">
-            Ensayos físico-químicos de producto a granel o terminado y emisión de dictamen de liberación.
-          </p>
+          <div class="station-header-text">
+            <div class="station-tag-row">
+              <span class="station-code-badge">EST-QC-01</span>
+              <span class="station-domain-badge">Dermo-Pharma GMP</span>
+              <span class="station-cat-badge">Control de Calidad & Laboratorio QC/QA</span>
+            </div>
+            <h1 class="station-title">Control de Calidad — Llenar Formato</h1>
+            <p class="station-desc">
+              Ensayos físico-químicos de producto a granel o terminado y emisión de dictamen de liberación COA.
+            </p>
+          </div>
         </div>
 
-        <div class="header-right">
-          <a routerLink="/trazabilidad/estaciones/control-calidad/registros" class="btn btn-outline">
+        <div class="station-header-actions">
+          <a routerLink="/trazabilidad/estaciones/control-calidad/registros" class="btn btn-secondary">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
@@ -43,21 +49,21 @@ interface ParametroCalidad {
             <span>Ver historial de análisis</span>
           </a>
         </div>
-      </div>
+      </header>
 
       <!-- ALERTA DE ÉXITO -->
-      <div *ngIf="successMessage()" class="alert alert--success">
+      <div *ngIf="successMessage()" class="alert-box alert--success">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
         <div>
           <strong>¡Análisis de calidad registrado y certificado generado!</strong>
-          <p>El dictamen ha sido emitido y archivado en los registros BPM.</p>
+          <p>El dictamen ha sido emitido y archivado en los registros BPM de la planta.</p>
         </div>
       </div>
 
       <!-- FORMULARIO DE CALIDAD -->
-      <form (ngSubmit)="guardarAnalisis()" class="form-layout">
+      <form (ngSubmit)="guardarAnalisis()" class="form-flow">
         
         <!-- SECCIÓN 1: DATOS DE LA MUESTRA -->
         <div class="card form-card">
@@ -70,28 +76,41 @@ interface ParametroCalidad {
             </div>
             <div>
               <h3>1. Información del Lote & Muestra</h3>
-              <p>Identificación del producto para análisis en laboratorio</p>
+              <p>Identificación del producto para análisis analítico en laboratorio</p>
             </div>
           </div>
 
           <div class="inputs-grid">
             <div class="form-group">
-              <label>Lote a Analizar *</label>
-              <input type="text" [(ngModel)]="formData.lote" name="lote" required placeholder="LOT-SH-2026-001" class="form-input" />
+              <label>Vincular Lote en Producción</label>
+              <select [(ngModel)]="formData.lote" name="loteSelector" (change)="onLoteChange()" class="form-select font-mono font-bold">
+                <option value="">-- Seleccionar Lote Fabricado --</option>
+                <option *ngFor="let fab of data.fabricaciones()" [value]="fab.lote">
+                  {{ fab.lote }} • {{ fab.nombreProducto }}
+                </option>
+                <option *ngFor="let ped of data.pedidos()" [value]="ped.loteAsignado">
+                  {{ ped.loteAsignado }} • {{ ped.productoNombre }} ({{ ped.numeroPedido }})
+                </option>
+              </select>
             </div>
 
             <div class="form-group">
-              <label>Nombre del Producto *</label>
-              <input type="text" [(ngModel)]="formData.nombreProducto" name="nombreProducto" required placeholder="Sérum Ácido Hialurónico 2%" class="form-input" />
+              <label>Número de Lote a Analizar <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.lote" name="lote" required placeholder="LOT-SH-2026-001" class="form-input font-mono font-bold" />
             </div>
 
             <div class="form-group">
-              <label>Marca *</label>
+              <label>Nombre del Producto <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.nombreProducto" name="nombreProducto" required placeholder="Sérum Ácido Hialurónico 2%" class="form-input font-bold" />
+            </div>
+
+            <div class="form-group">
+              <label>Marca / Línea <span class="req-star">*</span></label>
               <input type="text" [(ngModel)]="formData.marca" name="marca" required placeholder="BioTrace Derma" class="form-input" />
             </div>
 
             <div class="form-group">
-              <label>Tipo de Muestra *</label>
+              <label>Tipo de Muestra <span class="req-star">*</span></label>
               <select [(ngModel)]="formData.tipoMuestra" name="tipoMuestra" class="form-select">
                 <option value="Granel (Post-mezclado)">Granel (Post-mezclado en reactor)</option>
                 <option value="Producto Terminado">Producto Terminado (Envasado final)</option>
@@ -100,18 +119,18 @@ interface ParametroCalidad {
             </div>
 
             <div class="form-group">
-              <label>Fecha de Análisis *</label>
+              <label>Fecha de Análisis <span class="req-star">*</span></label>
               <input type="date" [(ngModel)]="formData.fecha" name="fecha" required class="form-input" />
             </div>
 
             <div class="form-group">
-              <label>Analista Responsable *</label>
-              <input type="text" [(ngModel)]="formData.analista" name="analista" required class="form-input" />
+              <label>Analista Responsable <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.analista" name="analista" required class="form-input font-bold" />
             </div>
           </div>
         </div>
 
-        <!-- SECCIÓN 2: ENSAYOS FÍSICO-QUÍMICOS (LAPROBELL SPEC) -->
+        <!-- SECCIÓN 2: ENSAYOS FÍSICO-QUÍMICOS -->
         <div class="card form-card">
           <div class="card-header">
             <div class="card-header-icon icon--emerald">
@@ -120,33 +139,61 @@ interface ParametroCalidad {
                 <polyline points="14 2 14 8 20 8"></polyline>
               </svg>
             </div>
-            <div>
+            <div style="flex: 1;">
               <h3>2. Ensayos y Parámetros Físico-Químicos</h3>
               <p>Verificación técnica de conformidad contra especificación galénica</p>
             </div>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="agregarParametro()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>+ Agregar Parámetro</span>
+            </button>
           </div>
 
           <div class="table-wrap">
             <table class="params-table">
               <thead>
                 <tr>
-                  <th>Parámetro</th>
-                  <th>Especificación Técnica</th>
-                  <th>Resultado Obtenido</th>
+                  <th style="min-width: 240px;">Parámetro Analítico *</th>
+                  <th style="min-width: 240px;">Especificación Técnica *</th>
+                  <th style="min-width: 200px;">Resultado Obtenido *</th>
                   <th style="width: 140px; text-align: center;">Dictamen</th>
+                  <th style="width: 50px;"></th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let p of parametros; let i = index">
-                  <td class="font-bold">{{ p.parametro }}</td>
-                  <td class="text-muted">{{ p.especificacion }}</td>
+                  <td>
+                    <input
+                      type="text"
+                      [(ngModel)]="p.parametro"
+                      [name]="'param_' + i"
+                      class="param-input font-bold"
+                      placeholder="Nombre del parámetro..."
+                      required
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      [(ngModel)]="p.especificacion"
+                      [name]="'spec_' + i"
+                      class="param-input text-muted"
+                      placeholder="Rango o criterio..."
+                      required
+                    />
+                  </td>
                   <td>
                     <input
                       type="text"
                       [(ngModel)]="p.resultado"
                       [name]="'res_' + i"
-                      class="param-input"
-                      placeholder="Valor medido..."
+                      class="param-input font-bold"
+                      placeholder="Valor medido en lab..."
+                      style="color: #0891b2;"
+                      required
                     />
                   </td>
                   <td style="text-align: center;">
@@ -158,6 +205,17 @@ interface ParametroCalidad {
                       (click)="p.cumple = !p.cumple"
                     >
                       {{ p.cumple ? '✓ Cumple' : '✕ No cumple' }}
+                    </button>
+                  </td>
+                  <td style="text-align: center;">
+                    <button
+                      type="button"
+                      *ngIf="parametros.length > 1"
+                      class="btn-delete-row"
+                      (click)="eliminarParametro(i)"
+                      title="Eliminar parámetro"
+                    >
+                      &times;
                     </button>
                   </td>
                 </tr>
@@ -175,24 +233,24 @@ interface ParametroCalidad {
               </svg>
             </div>
             <div>
-              <h3>3. Dictamen Final de Liberación</h3>
+              <h3>3. Dictamen Final de Liberación & Certificado COA</h3>
               <p>Aprobación técnica de aseguramiento de calidad (QA)</p>
             </div>
           </div>
 
           <div class="inputs-grid">
             <div class="form-group">
-              <label>Dictamen de Calidad *</label>
+              <label>Dictamen de Calidad <span class="req-star">*</span></label>
               <select [(ngModel)]="formData.dictamen" name="dictamen" class="form-select font-bold">
-                <option value="APROBADO / LIBERADO">APROBADO / LIBERADO (Apto para pase a envasado)</option>
+                <option value="APROBADO / LIBERADO">APROBADO / LIBERADO (Apto para pase a envasado y despacho)</option>
                 <option value="EN CUARENTENA">EN CUARENTENA (Pendiente de cultivo microbiológico)</option>
                 <option value="RECHAZADO">RECHAZADO (Fuera de especificación técnica)</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label>Firma / Dirección Técnica *</label>
-              <input type="text" [(ngModel)]="formData.firmadoPor" name="firmadoPor" class="form-input" />
+              <label>Firma / Dirección Técnica <span class="req-star">*</span></label>
+              <input type="text" [(ngModel)]="formData.firmadoPor" name="firmadoPor" required class="form-input font-bold" />
             </div>
 
             <div class="form-group full-width">
@@ -202,6 +260,7 @@ interface ParametroCalidad {
                 name="observaciones"
                 rows="3"
                 class="form-textarea"
+                placeholder="El producto analizado satisface los rangos de especificación técnica de la farmacopea..."
               ></textarea>
             </div>
           </div>
@@ -224,51 +283,9 @@ interface ParametroCalidad {
       </form>
     </div>
   `,
+  styleUrls: ['../../../../../shared/styles/registros-common.css'],
   styles: [`
-    .page-container {
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-      padding: 1.25rem 2rem 3rem 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      box-sizing: border-box;
-    }
-    .page-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .header-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #166534;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      margin-bottom: 0.5rem;
-    }
-    .header-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0 0 0.35rem 0;
-      letter-spacing: -0.02em;
-    }
-    .header-desc {
-      font-size: 0.88rem;
-      color: #64748b;
-      margin: 0;
-    }
-    .form-layout {
+    .form-flow {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
@@ -277,7 +294,7 @@ interface ParametroCalidad {
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 16px;
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
       overflow: hidden;
     }
     .card-header {
@@ -321,7 +338,7 @@ interface ParametroCalidad {
     .form-group {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.4rem;
     }
     .full-width {
       grid-column: 1 / -1;
@@ -331,13 +348,17 @@ interface ParametroCalidad {
       font-weight: 700;
       color: #334155;
     }
+    .req-star {
+      color: #dc2626;
+    }
     .form-input, .form-select, .form-textarea {
       width: 100%;
       padding: 0.65rem 0.85rem;
       border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      font-size: 0.85rem;
+      border: 1.5px solid #cbd5e1;
+      font-size: 0.875rem;
       color: #0f172a;
+      background: #ffffff;
       outline: none;
       box-sizing: border-box;
       transition: all 0.15s ease;
@@ -346,106 +367,105 @@ interface ParametroCalidad {
       border-color: #0891b2;
       box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
     }
+
+    /* TABLA DE PARÁMETROS */
     .table-wrap {
-      padding: 1.25rem 1.5rem;
+      padding: 1rem 1.5rem 1.5rem 1.5rem;
       overflow-x: auto;
     }
     .params-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.825rem;
+      font-size: 0.85rem;
     }
     .params-table th {
       background: #f8fafc;
-      padding: 0.75rem 0.85rem;
+      padding: 0.8rem 1rem;
       text-align: left;
       font-weight: 700;
       color: #475569;
       border-bottom: 1.5px solid #e2e8f0;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
     .params-table td {
-      padding: 0.75rem 0.85rem;
+      padding: 0.65rem 1rem;
       border-bottom: 1px solid #f1f5f9;
       vertical-align: middle;
     }
     .param-input {
       width: 100%;
-      padding: 0.45rem 0.65rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.8rem;
+      box-sizing: border-box;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #0f172a;
+      background: #ffffff;
       outline: none;
     }
     .param-input:focus {
       border-color: #0891b2;
+      box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.15);
     }
     .badge-toggle {
-      padding: 4px 12px;
+      padding: 5px 12px;
       border-radius: 9999px;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
       border: none;
       transition: all 0.15s ease;
     }
     .badge-toggle--ok {
-      background: #dcfce7;
-      color: #15803d;
+      background: #f0fdf4;
       border: 1px solid #bbf7d0;
+      color: #166534;
     }
     .badge-toggle--fail {
-      background: #fee2e2;
-      color: #b91c1c;
+      background: #fef2f2;
       border: 1px solid #fecaca;
+      color: #991b1b;
     }
+    .btn-delete-row {
+      background: none;
+      border: none;
+      color: #dc2626;
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .btn-delete-row:hover {
+      background: #fee2e2;
+    }
+
+    /* BARRA DE ACCIONES */
     .form-submit-bar {
       display: flex;
       align-items: center;
       justify-content: flex-end;
       gap: 1rem;
+      padding-top: 0.5rem;
     }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0.65rem 1.4rem;
-      border-radius: 9px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-decoration: none;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.15s ease;
-    }
-    .btn-primary {
-      background: #0891b2;
-      color: #ffffff;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: #0e7490;
-    }
-    .btn-secondary {
-      background: #ffffff;
-      border-color: #cbd5e1;
-      color: #475569;
-    }
-    .btn-outline {
-      background: #ffffff;
-      border-color: #e2e8f0;
-      color: #0f172a;
-    }
-    .alert--success {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      color: #166534;
+    .alert-box {
       display: flex;
       align-items: center;
       gap: 1rem;
       padding: 1rem 1.25rem;
       border-radius: 12px;
+      font-size: 0.85rem;
+    }
+    .alert--success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
     }
     .font-bold { font-weight: 700; }
-    .text-muted { color: #64748b; font-size: 0.78rem; }
+    .font-mono { font-family: monospace; }
+    .text-muted { color: #64748b; }
   `]
 })
 export class CalidadFormatoComponent implements OnInit {
@@ -457,34 +477,69 @@ export class CalidadFormatoComponent implements OnInit {
   successMessage = signal(false);
 
   formData = {
-    numeroPedido: 'PED-2026-001',
-    lote: 'LOT-SH-2026-001',
-    nombreProducto: 'Sérum Facial Ácido Hialurónico 2%',
-    marca: 'BioTrace Derma Care',
+    numeroPedido: '',
+    lote: '',
+    nombreProducto: '',
+    marca: 'BioTrace',
     tipoMuestra: 'Granel (Post-mezclado en reactor)',
     fecha: new Date().toISOString().split('T')[0],
-    analista: this.auth.currentUser()?.name || 'Dra. María Restrepo',
+    analista: this.auth.currentUser()?.name || '',
     dictamen: 'APROBADO / LIBERADO' as const,
-    firmadoPor: 'Dra. Elena Ramírez (Dirección Técnica)',
-    observaciones: 'El producto analizado satisface los rangos de especificación técnica de la farmacopea y registro sanitario.'
+    firmadoPor: '',
+    observaciones: ''
   };
 
   parametros: ParametroCalidad[] = [
-    { parametro: 'Densidad a 20°C (g/mL)', especificacion: '1.010 - 1.040', resultado: '1.025', cumple: true },
-    { parametro: 'pH a 25°C', especificacion: '5.50 - 6.50', resultado: '5.85', cumple: true },
-    { parametro: 'Viscosidad Brookfield (cP)', especificacion: '2500 - 4500 cP (Sp 4, 20 RPM)', resultado: '3200 cP', cumple: true },
-    { parametro: 'Aspecto Organoléptico', especificacion: 'Líquido viscoso homogéneo translúcido', resultado: 'Conforme', cumple: true },
-    { parametro: 'Color & Olor', especificacion: 'Incoloro a ligeramente cristalino / Inodoro', resultado: 'Conforme', cumple: true },
-    { parametro: 'Recuento Microbiológico', especificacion: '< 100 UFC/g (Ausencia patógenos)', resultado: '< 10 UFC/g', cumple: true }
+    { parametro: 'Densidad a 20°C (g/mL)', especificacion: '1.000 - 1.050', resultado: '', cumple: true },
+    { parametro: 'pH a 25°C', especificacion: '5.00 - 6.50', resultado: '', cumple: true },
+    { parametro: 'Aspecto Organoléptico', especificacion: 'Líquido / emulsión homogénea', resultado: '', cumple: true },
+    { parametro: 'Recuento Microbiológico', especificacion: '< 100 UFC/g', resultado: '', cumple: true }
   ];
 
   ngOnInit() {
-    const peds = this.data.pedidos();
-    if (peds.length > 0) {
-      this.formData.numeroPedido = peds[0].numeroPedido;
-      this.formData.lote = peds[0].loteAsignado;
-      this.formData.nombreProducto = peds[0].productoNombre;
+    const fabs = this.data.fabricaciones();
+    if (fabs.length > 0) {
+      this.formData.lote = fabs[0].lote;
+      this.formData.nombreProducto = fabs[0].nombreProducto;
+      this.formData.marca = fabs[0].marca;
+      this.formData.numeroPedido = fabs[0].numeroPedido;
+    } else {
+      const peds = this.data.pedidos();
+      if (peds.length > 0) {
+        this.formData.numeroPedido = peds[0].numeroPedido;
+        this.formData.lote = peds[0].loteAsignado;
+        this.formData.nombreProducto = peds[0].productoNombre;
+      }
     }
+  }
+
+  onLoteChange() {
+    if (!this.formData.lote) return;
+    const fab = this.data.fabricaciones().find(f => f.lote === this.formData.lote);
+    if (fab) {
+      this.formData.nombreProducto = fab.nombreProducto;
+      this.formData.marca = fab.marca;
+      this.formData.numeroPedido = fab.numeroPedido;
+      return;
+    }
+    const ped = this.data.pedidos().find(p => p.loteAsignado === this.formData.lote);
+    if (ped) {
+      this.formData.nombreProducto = ped.productoNombre;
+      this.formData.numeroPedido = ped.numeroPedido;
+    }
+  }
+
+  agregarParametro() {
+    this.parametros.push({
+      parametro: '',
+      especificacion: '',
+      resultado: '',
+      cumple: true
+    });
+  }
+
+  eliminarParametro(index: number) {
+    this.parametros.splice(index, 1);
   }
 
   guardarAnalisis() {
@@ -516,4 +571,3 @@ export class CalidadFormatoComponent implements OnInit {
     }, 700);
   }
 }
-

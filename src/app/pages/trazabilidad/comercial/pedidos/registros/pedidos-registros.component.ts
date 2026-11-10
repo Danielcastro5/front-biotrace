@@ -223,7 +223,7 @@ import { TraceabilityDataService, PedidoRecord } from '../../../../../core/servi
 
     <!-- MODAL EDITAR PEDIDO -->
     <div class="modal-backdrop" *ngIf="editItem()" (click)="editItem.set(null)">
-      <div class="modal-sheet" (click)="$event.stopPropagation()">
+      <div class="modal-sheet modal-sheet--wide" (click)="$event.stopPropagation()">
         <div class="modal-sheet-header">
           <div class="modal-title-wrap">
             <div class="modal-icon-badge" style="background: #eff6ff; color: #2563eb;">
@@ -232,30 +232,89 @@ import { TraceabilityDataService, PedidoRecord } from '../../../../../core/servi
               </svg>
             </div>
             <div>
-              <h3>Editar Orden de Pedido</h3>
-              <p>{{ editItem()?.numeroPedido }}</p>
+              <h3>Editar Orden de Pedido & Despacho</h3>
+              <p>Formato completo de solicitud comercial — {{ editItem()?.numeroPedido }}</p>
             </div>
           </div>
           <button class="modal-close-btn" (click)="editItem.set(null)">&times;</button>
         </div>
 
         <div class="modal-body" *ngIf="editItem() as item">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Cantidad de Unidades</label>
-              <input type="number" [(ngModel)]="item.cantidadUnidades" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;" />
+          <!-- SECCIÓN 1: IDENTIFICACIÓN Y VÍNCULO COMERCIAL -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">1. Vínculo de Cliente y Producto</span>
+              <span class="modal-fieldset-badge">{{ item.estado }}</span>
             </div>
-            <div>
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Estado del Pedido</label>
-              <select [(ngModel)]="item.estado" class="filter-select" style="width: 100%; margin-top: 4px; padding: 0.5rem;">
-                <option value="En Proceso">En Proceso</option>
-                <option value="Listo para Despacho">Listo para Despacho</option>
-                <option value="Despachado (Salida Autorizada)">Despachado (Salida Autorizada)</option>
-              </select>
+            <div class="modal-form-grid modal-form-grid--4">
+              <div class="modal-field">
+                <label class="modal-field-label">Número de Pedido <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.numeroPedido" class="modal-field-input" placeholder="PED-..." />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Cliente Solicitante <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.clienteNombre" class="modal-field-input" placeholder="Razón social cliente" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Producto Solicitado <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.productoNombre" class="modal-field-input" placeholder="Nombre de producto" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Lote Industrial Asignado <span class="req">*</span></label>
+                <input type="text" [(ngModel)]="item.loteAsignado" class="modal-field-input" placeholder="LOT-..." />
+              </div>
             </div>
-            <div style="grid-column: 1 / -1;">
-              <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Observaciones</label>
-              <textarea [(ngModel)]="item.observaciones" rows="3" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.5rem; border-radius: 8px; margin-top: 4px;"></textarea>
+          </div>
+
+          <!-- SECCIÓN 2: CANTIDADES Y CRONOGRAMA -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">2. Cantidad, Volumen y Cronograma</span>
+              <span class="modal-fieldset-badge">Fabricación</span>
+            </div>
+            <div class="modal-form-grid modal-form-grid--4">
+              <div class="modal-field">
+                <label class="modal-field-label">Cantidad (Unidades) <span class="req">*</span></label>
+                <input type="number" [(ngModel)]="item.cantidadUnidades" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Tamaño Lote (Kg) <span class="req">*</span></label>
+                <input type="number" [(ngModel)]="item.tamanoLoteKg" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Fecha de Radicación <span class="req">*</span></label>
+                <input type="date" [(ngModel)]="item.fechaPedido" class="modal-field-input" />
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Fecha Entrega Requerida <span class="req">*</span></label>
+                <input type="date" [(ngModel)]="item.fechaEntregaRequerida" class="modal-field-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SECCIÓN 3: LOGÍSTICA DE SALIDA Y ESTADO -->
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-header">
+              <span class="modal-fieldset-title">3. Estado de Orden y Remisión de Despacho</span>
+              <span class="modal-fieldset-badge">Salida</span>
+            </div>
+            <div class="modal-form-grid">
+              <div class="modal-field">
+                <label class="modal-field-label">Estado Actual de la Orden <span class="req">*</span></label>
+                <select [(ngModel)]="item.estado" class="modal-field-select">
+                  <option value="En Proceso">En Proceso</option>
+                  <option value="Listo para Despacho">Listo para Despacho</option>
+                  <option value="Despachado (Salida Autorizada)">Despachado (Salida Autorizada)</option>
+                </select>
+              </div>
+              <div class="modal-field">
+                <label class="modal-field-label">Número de Guía / Remisión de Despacho</label>
+                <input type="text" [(ngModel)]="item.numeroGuiaDespacho" class="modal-field-input" placeholder="GUIA-..." />
+              </div>
+              <div class="modal-field modal-form-grid--full">
+                <label class="modal-field-label">Observaciones Comerciales y de Entrega</label>
+                <textarea [(ngModel)]="item.observaciones" rows="3" class="modal-field-textarea" placeholder="Instrucciones especiales de transporte, embalaje o entrega al cliente..."></textarea>
+              </div>
             </div>
           </div>
         </div>

@@ -36,26 +36,31 @@ describe('LoginComponent interactions', () => {
     component.handleLogin();
 
     expect(auth.login).toHaveBeenCalledWith('qa@example.com', 'secret');
-    expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    expect(router.navigate).toHaveBeenCalledWith(['/trazabilidad/inicio']);
     expect(component.isLoading()).toBe(false);
   });
 
-  it('uses the read-only sign-in action when selected', () => {
+  it('handles login errors properly when credentials fail', () => {
     const auth = {
-      login: vi.fn(() => of(true)),
+      login: vi.fn(() => ({
+        subscribe: ({ error }: { next: () => void; error: (err: { message: string }) => void }) => {
+          error({ message: 'Credenciales inválidas' });
+        }
+      })),
       loginReadOnly: vi.fn(() => of(true)),
       sessionNotice: signal(''),
     };
     const router = { navigate: vi.fn() };
-    const component = createLoginComponent(auth, router);
-    component.readOnlyAccess = true;
-    component.password = ' query-key ';
+    const component = createLoginComponent(auth as unknown as AuthService, router);
+    component.email = 'qa@example.com';
+    component.password = 'wrong-password';
 
     component.handleLogin();
 
-    expect(auth.loginReadOnly).toHaveBeenCalledWith('query-key');
-    expect(auth.login).not.toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    expect(auth.login).toHaveBeenCalledWith('qa@example.com', 'wrong-password');
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toBe('Credenciales inválidas');
+    expect(component.isLoading()).toBe(false);
   });
 
   it('toggles password visibility and blocks an empty credential submission', () => {

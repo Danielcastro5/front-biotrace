@@ -22,20 +22,23 @@ import { TraceabilityDataService, PedidoRecord } from '../../../../../core/servi
           <div class="station-header-text">
             <div class="station-tag-row">
               <span class="station-code-badge">EST-PED-01</span>
+              <span class="station-domain-badge">Dermo-Pharma CRM</span>
               <span class="station-cat-badge">Módulo Comercial & Ventas</span>
             </div>
             <h1 class="station-title">Crear Orden de Pedido</h1>
-            <p class="station-desc">Punto de inicio (Paso 1) de la cadena de trazabilidad de manufactura.</p>
+            <p class="station-desc">Punto de inicio (Paso 1) de la cadena de trazabilidad de manufactura y asignación de lote.</p>
           </div>
         </div>
 
-        <a routerLink="/trazabilidad/comercial/pedidos/registros" class="btn btn-secondary">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          <span>Ver órdenes de pedido</span>
-        </a>
+        <div class="station-header-actions">
+          <a routerLink="/trazabilidad/comercial/pedidos/registros" class="btn btn-secondary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Ver órdenes de pedido</span>
+          </a>
+        </div>
       </header>
 
       <div *ngIf="successMsg()" class="alert-box alert--success">
@@ -48,66 +51,142 @@ import { TraceabilityDataService, PedidoRecord } from '../../../../../core/servi
         </div>
       </div>
 
-      <form (ngSubmit)="guardarPedido()" class="filter-card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
-        <h3 style="font-size: 1.05rem; font-weight: 800; color: #0f172a; margin: 0;">1. Información de la Orden & Cliente</h3>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.15rem;">
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Número de Pedido *</label>
-            <input type="text" [(ngModel)]="pedido.numeroPedido" name="numeroPedido" required class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.65rem; border-radius: 8px; margin-top: 4px; font-family: monospace; font-weight: 700; color: #0891b2;" />
+      <form (ngSubmit)="guardarPedido()" class="form-flow">
+        <div class="form-card-box">
+          <div class="form-card-box__header">
+            <div class="form-card-box__num">1</div>
+            <div>
+              <h3 class="form-card-box__title">Información de la Orden & Cliente</h3>
+              <p class="form-card-box__subtitle">Asignación de cliente, producto a manufacturar y lote programado</p>
+            </div>
           </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Cliente Comercial *</label>
-            <select [(ngModel)]="pedido.clienteId" name="clienteId" (change)="onClienteChange()" required class="filter-select" style="width: 100%; margin-top: 4px; padding: 0.65rem;">
-              <option value="">-- Seleccionar Cliente --</option>
-              <option *ngFor="let c of data.clientes()" [value]="c.id">{{ c.razonSocial }} ({{ c.ciudad }})</option>
-            </select>
-          </div>
+          <div class="form-inputs-grid form-inputs-grid--3">
+            <div class="form-field-group">
+              <label class="form-field-label">Número de Pedido Comercial <span class="req-star">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="pedido.numeroPedido"
+                name="numeroPedido"
+                required
+                class="form-field-control font-mono font-bold"
+                style="color: #0891b2;"
+              />
+            </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Producto Solicitado *</label>
-            <select [(ngModel)]="pedido.productoId" name="productoId" (change)="onProductoChange()" required class="filter-select" style="width: 100%; margin-top: 4px; padding: 0.65rem;">
-              <option value="">-- Seleccionar Producto con Fórmula --</option>
-              <option *ngFor="let p of data.productos()" [value]="p.id">{{ p.nombre }} ({{ p.codigo }})</option>
-            </select>
-          </div>
+            <div class="form-field-group">
+              <label class="form-field-label">Cliente Comercial Solicitante <span class="req-star">*</span></label>
+              <select
+                [(ngModel)]="pedido.clienteId"
+                name="clienteId"
+                (change)="onClienteChange()"
+                required
+                class="form-field-control font-bold"
+              >
+                <option value="">-- Seleccionar Cliente --</option>
+                <option *ngFor="let c of data.clientes()" [value]="c.id">
+                  {{ c.razonSocial }} ({{ c.ciudad }})
+                </option>
+              </select>
+            </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Cantidad Solicitada (Unidades) *</label>
-            <input type="number" [(ngModel)]="pedido.cantidadUnidades" name="cantidadUnidades" required placeholder="5000" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.65rem; border-radius: 8px; margin-top: 4px;" />
-          </div>
+            <div class="form-field-group">
+              <label class="form-field-label">Producto Solicitado (con Fórmula) <span class="req-star">*</span></label>
+              <select
+                [(ngModel)]="pedido.productoId"
+                name="productoId"
+                (change)="onProductoChange()"
+                required
+                class="form-field-control font-bold"
+              >
+                <option value="">-- Seleccionar Producto con Fórmula --</option>
+                <option *ngFor="let p of data.productos()" [value]="p.id">
+                  {{ p.nombre }} ({{ p.codigo }})
+                </option>
+              </select>
+            </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Lote de Fabricación Asignado *</label>
-            <input type="text" [(ngModel)]="pedido.loteAsignado" name="loteAsignado" required class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.65rem; border-radius: 8px; margin-top: 4px; font-family: monospace; font-weight: 800;" />
-          </div>
+            <div class="form-field-group">
+              <label class="form-field-label">Cantidad Solicitada (Unidades) <span class="req-star">*</span></label>
+              <input
+                type="number"
+                [(ngModel)]="pedido.cantidadUnidades"
+                name="cantidadUnidades"
+                required
+                placeholder="5000"
+                class="form-field-control font-bold"
+              />
+            </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Tamaño Estimado del Lote (Kg) *</label>
-            <input type="number" [(ngModel)]="pedido.tamanoLoteKg" name="tamanoLoteKg" required placeholder="150" class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.65rem; border-radius: 8px; margin-top: 4px;" />
-          </div>
+            <div class="form-field-group">
+              <label class="form-field-label">Lote de Fabricación Asignado <span class="req-star">*</span></label>
+              <input
+                type="text"
+                [(ngModel)]="pedido.loteAsignado"
+                name="loteAsignado"
+                required
+                class="form-field-control font-mono font-bold"
+                style="color: #0891b2;"
+              />
+            </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Fecha de Pedido *</label>
-            <input type="date" [(ngModel)]="pedido.fechaPedido" name="fechaPedido" required class="filter-date" style="width: 100%; margin-top: 4px; padding: 0.65rem;" />
-          </div>
+            <div class="form-field-group">
+              <label class="form-field-label">Tamaño Estimado del Lote (Kg) <span class="req-star">*</span></label>
+              <input
+                type="number"
+                step="0.1"
+                [(ngModel)]="pedido.tamanoLoteKg"
+                name="tamanoLoteKg"
+                required
+                placeholder="150"
+                class="form-field-control font-bold"
+              />
+            </div>
 
-          <div>
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Fecha Requerida de Entrega *</label>
-            <input type="date" [(ngModel)]="pedido.fechaEntregaRequerida" name="fechaEntregaRequerida" required class="filter-date" style="width: 100%; margin-top: 4px; padding: 0.65rem;" />
-          </div>
+            <div class="form-field-group">
+              <label class="form-field-label">Fecha de Pedido <span class="req-star">*</span></label>
+              <input
+                type="date"
+                [(ngModel)]="pedido.fechaPedido"
+                name="fechaPedido"
+                required
+                class="form-field-control"
+              />
+            </div>
 
-          <div style="grid-column: 1 / -1;">
-            <label style="font-size: 0.75rem; font-weight: 700; color: #334155;">Observaciones Comerciales</label>
-            <textarea [(ngModel)]="pedido.observaciones" name="observaciones" rows="3" placeholder="Instrucciones especiales de acondicionamiento o entrega..." class="filter-input" style="border: 1px solid #cbd5e1; padding: 0.65rem; border-radius: 8px; margin-top: 4px;"></textarea>
+            <div class="form-field-group">
+              <label class="form-field-label">Fecha Requerida de Entrega <span class="req-star">*</span></label>
+              <input
+                type="date"
+                [(ngModel)]="pedido.fechaEntregaRequerida"
+                name="fechaEntregaRequerida"
+                required
+                class="form-field-control"
+              />
+            </div>
+
+            <div class="form-field-group full-width-span">
+              <label class="form-field-label">Observaciones Comerciales & Despacho</label>
+              <textarea
+                [(ngModel)]="pedido.observaciones"
+                name="observaciones"
+                rows="3"
+                placeholder="Instrucciones especiales de acondicionamiento o entrega..."
+                class="form-field-control"
+              ></textarea>
+            </div>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+        <div class="form-action-bar">
           <a routerLink="/trazabilidad/comercial/pedidos/registros" class="btn btn-secondary">Cancelar</a>
           <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
-            {{ isSaving() ? 'Creando orden de pedido...' : 'Crear Orden de Pedido' }}
+            <svg *ngIf="!isSaving()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>{{ isSaving() ? 'Creando orden de pedido...' : 'Crear Orden de Pedido' }}</span>
           </button>
         </div>
       </form>
@@ -115,6 +194,94 @@ import { TraceabilityDataService, PedidoRecord } from '../../../../../core/servi
   `,
   styleUrls: ['../../../../../shared/styles/registros-common.css'],
   styles: [`
+    .form-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .form-card-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    }
+    .form-card-box__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.25rem;
+    }
+    .form-card-box__num {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #ecfeff;
+      border: 1.5px solid #0891b2;
+      color: #0891b2;
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .form-card-box__title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+    }
+    .form-card-box__subtitle {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin: 2px 0 0 0;
+    }
+    .form-inputs-grid {
+      display: grid;
+      gap: 1.15rem;
+    }
+    .form-inputs-grid--3 {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .full-width-span {
+      grid-column: 1 / -1;
+    }
+    .form-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .form-field-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #334155;
+    }
+    .req-star {
+      color: #dc2626;
+    }
+    .form-field-control {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      color: #0f172a;
+      background: #ffffff;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .form-field-control:focus {
+      border-color: #0891b2;
+      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.15);
+    }
+    .form-action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
     .alert-box {
       display: flex;
       align-items: center;
@@ -127,6 +294,12 @@ import { TraceabilityDataService, PedidoRecord } from '../../../../../core/servi
       background: #f0fdf4;
       border: 1px solid #bbf7d0;
       color: #166534;
+    }
+    .font-mono {
+      font-family: monospace;
+    }
+    .font-bold {
+      font-weight: 700;
     }
   `]
 })
@@ -145,12 +318,12 @@ export class PedidosFormatoComponent implements OnInit {
     productoId: '',
     productoNombre: '',
     loteAsignado: `LOT-BIO-2026-${Math.floor(100 + Math.random() * 900)}`,
-    cantidadUnidades: 4000,
-    tamanoLoteKg: 150,
+    cantidadUnidades: 0,
+    tamanoLoteKg: 0,
     fechaPedido: new Date().toISOString().split('T')[0],
     fechaEntregaRequerida: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
     estado: 'En Proceso',
-    observaciones: 'Orden ingresada desde panel comercial. Requiere dosificación y pase a reactor.'
+    observaciones: ''
   };
 
   ngOnInit() {
