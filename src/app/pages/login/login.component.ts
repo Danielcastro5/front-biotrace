@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -550,16 +550,21 @@ import { AuthService } from '../../core/services/auth.service';
     }
   `],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   auth = inject(AuthService);
   private router = inject(Router);
 
-  
   email = '';
   password = '';
   showPassword = signal<boolean>(false);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
+
+  ngOnInit() {
+    if (this.auth?.isAuthenticated && this.auth.isAuthenticated()) {
+      this.router.navigate(['/trazabilidad/inicio']);
+    }
+  }
 
   togglePasswordVisibility() {
     this.showPassword.update((v) => !v);

@@ -17,6 +17,50 @@ export interface AuthResponse {
   user: User;
 }
 
+function extractErrorMessage(error: any, fallback = 'Error al autenticar credenciales en el servidor.'): string {
+  if (!error) return fallback;
+
+  if (typeof error.error === 'string') {
+    if (error.error.includes('<html') || error.error.includes('<!DOCTYPE')) {
+      if (error.status === 504 || error.status === 502) {
+        return 'El servidor en la nube está iniciando (demora ~45s al reactivarse en Render). Por favor intenta de nuevo en unos segundos.';
+      }
+      return `Error del servidor (${error.status}: ${error.statusText || 'Error de comunicación'}).`;
+    }
+    return error.error;
+  }
+
+  if (error.error && typeof error.error === 'object') {
+    if (typeof error.error.error === 'string' && error.error.error.trim()) {
+      return error.error.error;
+    }
+    if (error.error.error && typeof error.error.error === 'object') {
+      if (typeof error.error.error.message === 'string' && error.error.error.message.trim()) {
+        return error.error.error.message;
+      }
+    }
+    if (typeof error.error.message === 'string' && error.error.message.trim()) {
+      return error.error.message;
+    }
+    if (typeof error.error.detail === 'string' && error.error.detail.trim()) {
+      return error.error.detail;
+    }
+  }
+
+  if (error.status === 504 || error.status === 502) {
+    return 'El servidor en la nube está reactivándose de modo reposo (Render). Por favor espera un momento y vuelve a intentar.';
+  }
+  if (error.status === 0) {
+    return 'No se pudo conectar con el servidor (verifique su conexión a Internet o disponibilidad del backend).';
+  }
+
+  if (typeof error.message === 'string' && error.message.trim() && error.message !== '[object Object]') {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -37,7 +81,11 @@ export class AuthService {
   // Signals reactivos para el estado de autenticación
   currentUser = signal<User | null>(this.getStoredUser());
   token = signal<string | null>(localStorage.getItem(this.TOKEN_KEY));
-  isAuthenticated = computed(() => !!this.token() && !!this.currentUser());
+  isAuthenticated = computed(() => {
+    const t = this.token();
+    const u = this.currentUser();
+    return !!t && !!u && !this.isTokenExpired(t);
+  });
 
   // Contador regresivo de inactividad (segundos restantes)
   secondsRemaining = signal<number>(this.INACTIVITY_LIMIT_SECONDS);
@@ -58,9 +106,32 @@ export class AuthService {
   private lastTokenRefreshTimestamp = Date.now();
 
   constructor() {
-    // Si ya hay sesión guardada en localStorage, inicializar timers
-    if (this.isAuthenticated()) {
+    const storedToken = localStorage.getItem(this.TOKEN_KEY);
+    if (storedToken && this.isTokenExpired(storedToken)) {
+      // Limpiar datos obsoletos si el token ya expiró
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.USER_KEY);
+      localStorage.removeItem(this.LAST_ACTIVITY_KEY);
+      this.token.set(null);
+      this.currentUser.set(null);
+    } else if (this.isAuthenticated()) {
       this.initInactivityTracker();
+    }
+  }
+
+  /**
+   * Verifica si un token JWT ha expirado
+   */
+  private isTokenExpired(token: string | null): boolean {
+    if (!token) return true;
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return false;
+      const payload = JSON.parse(atob(parts[1]));
+      if (!payload.exp) return false;
+      return (payload.exp * 1000) <= Date.now();
+    } catch {
+      return false;
     }
   }
 
@@ -76,8 +147,7 @@ export class AuthService {
         this.initInactivityTracker();
       }),
       catchError((error) => {
-        // En caso de que el backend no tenga DB activa o falle, mensaje amigable
-        const msg = error.error?.error || 'Error al autenticar credenciales en el servidor.';
+        const msg = extractErrorMessage(error);
         throw new Error(msg);
       }),
       map(() => true)
@@ -90,7 +160,11 @@ export class AuthService {
   loginReadOnly(key: string): Observable<boolean> {
     return this.http.post<AuthResponse>(this.baseUrl + '/auth/read-only-session', {key}).pipe(
       tap(res => { this.saveSession(res.token,res.user); this.initInactivityTracker(); }),
-      map(() => true), catchError(error => { throw new Error(error.error?.error || 'No se pudo abrir la consulta local.'); })
+      map(() => true),
+      catchError(error => {
+        const msg = extractErrorMessage(error, 'No se pudo abrir la consulta local.');
+        throw new Error(msg);
+      })
     );
   }
   private saveSession(jwtToken: string, user: User) {

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { guestGuard } from './core/guards/guest.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { InicioComponent } from './pages/trazabilidad/inicio/inicio.component';
 
@@ -35,7 +36,7 @@ import { PedidosRegistrosComponent } from './pages/trazabilidad/comercial/pedido
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'home', redirectTo: 'trazabilidad/inicio', pathMatch: 'full' },
   { path: 'trazabilidad', redirectTo: 'trazabilidad/inicio', pathMatch: 'full' },
 
