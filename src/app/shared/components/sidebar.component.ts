@@ -663,16 +663,31 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .lap-sidebar-nav-item:hover {
-      background: #f8fafc;
+      background: linear-gradient(135deg, rgba(241, 245, 249, 0.85) 0%, rgba(255, 255, 255, 0.95) 100%);
       color: #0f172a;
-      border-color: #e2e8f0;
+      border-color: rgba(203, 213, 225, 0.8);
+      box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.04);
     }
 
+    /* ======================================================== */
+    /* ESTILOS LIQUID GLASS PARA ELEMENTOS ACTIVOS DEL MENÚ     */
+    /* ======================================================== */
     .lap-sidebar-nav-item--active {
-      background: #ecfeff !important;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.16) 0%, rgba(14, 165, 233, 0.08) 50%, rgba(255, 255, 255, 0.75) 100%) !important;
+      backdrop-filter: blur(14px) saturate(190%);
+      -webkit-backdrop-filter: blur(14px) saturate(190%);
+      border: 1px solid rgba(6, 182, 212, 0.45) !important;
+      box-shadow: 
+        inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+        0 4px 14px -2px rgba(6, 182, 212, 0.25),
+        0 1px 3px 0 rgba(15, 23, 42, 0.04) !important;
       color: #0891b2 !important;
-      border-color: rgba(6, 182, 212, 0.35) !important;
       font-weight: 700;
+    }
+
+    .lap-sidebar-nav-item--active svg {
+      color: #0891b2;
+      filter: drop-shadow(0 1px 3px rgba(6, 182, 212, 0.45));
     }
 
     .lap-sidebar-nav {
@@ -714,8 +729,9 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .lap-sidebar-station-header:hover {
-      background: #f8fafc;
+      background: linear-gradient(135deg, rgba(241, 245, 249, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
       color: #0f172a;
+      border-color: rgba(226, 232, 240, 0.7);
     }
 
     .lap-sidebar-station-header__left {
@@ -753,9 +769,10 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .lap-sidebar-master-header--open {
-      background: #ecfeff;
-      border-color: rgba(6, 182, 212, 0.35);
-      color: #0891b2;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(240, 253, 255, 0.85) 100%) !important;
+      border: 1px solid rgba(6, 182, 212, 0.38) !important;
+      color: #0891b2 !important;
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9), 0 3px 10px -2px rgba(6, 182, 212, 0.15) !important;
     }
 
     .lap-sidebar-master-header__text {
@@ -779,17 +796,25 @@ import { AuthService } from '../../core/services/auth.service';
       font-size: 12.5px;
       padding: 7px 10px;
       color: #475569;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
     }
 
     .lap-sidebar-subgroup-header:hover {
-      background: #f1f5f9;
+      background: linear-gradient(135deg, rgba(241, 245, 249, 0.8) 0%, rgba(255, 255, 255, 0.9) 100%);
       color: #0f172a;
+      border-color: rgba(226, 232, 240, 0.8);
     }
 
     .lap-sidebar-subgroup-header--active {
-      color: #0891b2;
-      font-weight: 700;
-      background: #f0fdff;
+      color: #0891b2 !important;
+      font-weight: 700 !important;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(255, 255, 255, 0.8) 100%) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(6, 182, 212, 0.32) !important;
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.85), 0 2px 8px -2px rgba(6, 182, 212, 0.15) !important;
     }
 
     .lap-sidebar-nested-substations {
@@ -810,6 +835,13 @@ import { AuthService } from '../../core/services/auth.service';
       border-radius: 8px;
       white-space: nowrap;
       overflow: hidden;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .lap-sidebar-station-header--sub:hover {
+      background: rgba(241, 245, 249, 0.85);
+      border-color: rgba(226, 232, 240, 0.8);
     }
 
     .lap-sidebar-station-header--sub .lap-sidebar-station-header__left {
@@ -828,9 +860,11 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .lap-sidebar-station-header--active {
-      color: #0891b2;
-      font-weight: 700;
-      background: #ecfeff;
+      color: #0891b2 !important;
+      font-weight: 700 !important;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.14) 0%, rgba(255, 255, 255, 0.8) 100%) !important;
+      border: 1px solid rgba(6, 182, 212, 0.35) !important;
+      box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.9), 0 2px 8px -2px rgba(6, 182, 212, 0.16) !important;
     }
 
     .lap-sidebar-submenu--sub {
@@ -839,6 +873,9 @@ import { AuthService } from '../../core/services/auth.service';
       margin-top: 2px;
       margin-bottom: 4px;
       border-left: 1.5px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
     }
 
     .lap-sidebar-subitem {
@@ -846,32 +883,64 @@ import { AuthService } from '../../core/services/auth.service';
       align-items: center;
       gap: 8px;
       padding: 6px 10px;
-      border-radius: 8px;
-      border: none;
+      border-radius: 9px;
+      border: 1px solid transparent;
       background: transparent;
       color: #64748b;
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       text-align: left;
       width: 100%;
+      position: relative;
     }
 
-    .lap-sidebar-subitem:hover {
-      background: #f1f5f9;
+    .lap-sidebar-subitem:hover:not(.lap-sidebar-subitem--active) {
+      background: linear-gradient(135deg, rgba(241, 245, 249, 0.85) 0%, rgba(255, 255, 255, 0.95) 100%);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-color: rgba(226, 232, 240, 0.85);
       color: #0f172a;
+      box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.04);
     }
 
+    /* BOTONES SELECCIONADOS: LIQUID GLASS ELEVADO */
     .lap-sidebar-subitem--active {
-      background: #ecfeff;
-      color: #0891b2;
-      font-weight: 700;
-      border-left: 2px solid #06b6d4;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.16) 0%, rgba(14, 165, 233, 0.09) 50%, rgba(255, 255, 255, 0.75) 100%) !important;
+      backdrop-filter: blur(14px) saturate(190%);
+      -webkit-backdrop-filter: blur(14px) saturate(190%);
+      border: 1px solid rgba(6, 182, 212, 0.45) !important;
+      box-shadow: 
+        inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.95),
+        0 4px 14px -2px rgba(6, 182, 212, 0.22),
+        0 1px 3px 0 rgba(15, 23, 42, 0.05) !important;
+      color: #0e7490 !important;
+      font-weight: 700 !important;
+      padding-left: 14px !important;
+    }
+
+    .lap-sidebar-subitem--active::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3.5px;
+      height: 60%;
+      border-radius: 999px;
+      background: #06b6d4;
+      box-shadow: 0 0 10px #06b6d4, 0 0 3px #0891b2;
+    }
+
+    .lap-sidebar-subitem--active svg {
+      color: #0891b2 !important;
+      filter: drop-shadow(0 1px 3px rgba(6, 182, 212, 0.45));
     }
 
     .lap-sidebar-subitem svg {
       flex-shrink: 0;
+      transition: color 0.15s ease, transform 0.15s ease;
     }
 
     .lap-portal-sidebar__mini-icons {
@@ -903,9 +972,10 @@ import { AuthService } from '../../core/services/auth.service';
     }
 
     .lap-portal-mini-slot--active {
-      background: #ecfeff;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.18) 0%, rgba(255, 255, 255, 0.8) 100%);
       color: #0891b2;
-      border: 1px solid rgba(6, 182, 212, 0.35);
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), 0 3px 10px -1px rgba(6, 182, 212, 0.25);
     }
   `]
 })
@@ -944,31 +1014,142 @@ export class SidebarComponent implements OnInit {
   }
 
   private syncAccordionsWithUrl(url: string) {
-    if (url.includes('/trazabilidad/estaciones/')) {
+    if (!url) return;
+    const cleanUrl = url.split('?')[0].split('#')[0];
+
+    if (cleanUrl.startsWith('/trazabilidad/estaciones')) {
       this.openEstaciones.set(true);
-      if (url.includes('materia-prima')) {
-        this.openSubmenus.update(m => ({ ...m, 'materias-primas': true }));
-        if (url.includes('/ingreso')) {
-          this.openInnerSections.update(s => ({ ...s, 'ingreso-mp': true }));
-        } else if (url.includes('/consumo')) {
-          this.openInnerSections.update(s => ({ ...s, 'consumo-mp': true }));
+      this.openVentas.set(false);
+
+      if (cleanUrl.includes('materia-prima')) {
+        this.openSubmenus.set({
+          'materias-primas': true,
+          'fabricacion': false,
+          'control-calidad': false,
+          'trazabilidad-360': false
+        });
+
+        if (cleanUrl.includes('/ingreso')) {
+          this.openInnerSections.set({
+            'ingreso-mp': true,
+            'consumo-mp': false,
+            'comercial-clientes': false,
+            'comercial-productos': false,
+            'comercial-pedidos': false
+          });
+        } else if (cleanUrl.includes('/consumo')) {
+          this.openInnerSections.set({
+            'ingreso-mp': false,
+            'consumo-mp': true,
+            'comercial-clientes': false,
+            'comercial-productos': false,
+            'comercial-pedidos': false
+          });
+        } else {
+          // Inventario y Stock
+          this.openInnerSections.set({
+            'ingreso-mp': false,
+            'consumo-mp': false,
+            'comercial-clientes': false,
+            'comercial-productos': false,
+            'comercial-pedidos': false
+          });
         }
-      } else if (url.includes('fabricacion')) {
-        this.openSubmenus.update(m => ({ ...m, 'fabricacion': true }));
-      } else if (url.includes('control-calidad')) {
-        this.openSubmenus.update(m => ({ ...m, 'control-calidad': true }));
-      } else if (url.includes('trazabilidad-360')) {
-        this.openSubmenus.update(m => ({ ...m, 'trazabilidad-360': true }));
+      } else if (cleanUrl.includes('fabricacion')) {
+        this.openSubmenus.set({
+          'materias-primas': false,
+          'fabricacion': true,
+          'control-calidad': false,
+          'trazabilidad-360': false
+        });
+        this.openInnerSections.set({
+          'ingreso-mp': false,
+          'consumo-mp': false,
+          'comercial-clientes': false,
+          'comercial-productos': false,
+          'comercial-pedidos': false
+        });
+      } else if (cleanUrl.includes('control-calidad')) {
+        this.openSubmenus.set({
+          'materias-primas': false,
+          'fabricacion': false,
+          'control-calidad': true,
+          'trazabilidad-360': false
+        });
+        this.openInnerSections.set({
+          'ingreso-mp': false,
+          'consumo-mp': false,
+          'comercial-clientes': false,
+          'comercial-productos': false,
+          'comercial-pedidos': false
+        });
+      } else if (cleanUrl.includes('trazabilidad-360')) {
+        this.openSubmenus.set({
+          'materias-primas': false,
+          'fabricacion': false,
+          'control-calidad': false,
+          'trazabilidad-360': true
+        });
+        this.openInnerSections.set({
+          'ingreso-mp': false,
+          'consumo-mp': false,
+          'comercial-clientes': false,
+          'comercial-productos': false,
+          'comercial-pedidos': false
+        });
       }
-    } else if (url.includes('/trazabilidad/comercial/')) {
+    } else if (cleanUrl.startsWith('/trazabilidad/comercial')) {
+      this.openEstaciones.set(false);
       this.openVentas.set(true);
-      if (url.includes('/clientes')) {
-        this.openInnerSections.update(s => ({ ...s, 'comercial-clientes': true }));
-      } else if (url.includes('/productos')) {
-        this.openInnerSections.update(s => ({ ...s, 'comercial-productos': true }));
-      } else if (url.includes('/pedidos')) {
-        this.openInnerSections.update(s => ({ ...s, 'comercial-pedidos': true }));
+      this.openSubmenus.set({
+        'materias-primas': false,
+        'fabricacion': false,
+        'control-calidad': false,
+        'trazabilidad-360': false
+      });
+
+      if (cleanUrl.includes('/clientes')) {
+        this.openInnerSections.set({
+          'ingreso-mp': false,
+          'consumo-mp': false,
+          'comercial-clientes': true,
+          'comercial-productos': false,
+          'comercial-pedidos': false
+        });
+      } else if (cleanUrl.includes('/productos')) {
+        this.openInnerSections.set({
+          'ingreso-mp': false,
+          'consumo-mp': false,
+          'comercial-clientes': false,
+          'comercial-productos': true,
+          'comercial-pedidos': false
+        });
+      } else if (cleanUrl.includes('/pedidos')) {
+        this.openInnerSections.set({
+          'ingreso-mp': false,
+          'consumo-mp': false,
+          'comercial-clientes': false,
+          'comercial-productos': false,
+          'comercial-pedidos': true
+        });
       }
+    } else {
+      // Panel Principal u otras rutas generales
+      this.openEstaciones.set(false);
+      this.openVentas.set(false);
+      this.openSubmenus.set({
+        'materias-primas': false,
+        'fabricacion': false,
+        'control-calidad': false,
+        'trazabilidad-360': false
+      });
+      this.openInnerSections.set({
+        'ingreso-mp': false,
+        'consumo-mp': false,
+        'comercial-clientes': false,
+        'comercial-productos': false,
+        'comercial-pedidos': false
+      });
     }
   }
 
@@ -1015,6 +1196,7 @@ export class SidebarComponent implements OnInit {
   }
 
   navigateTo(path: string) {
+    this.syncAccordionsWithUrl(path);
     this.router.navigate([path]);
   }
 }

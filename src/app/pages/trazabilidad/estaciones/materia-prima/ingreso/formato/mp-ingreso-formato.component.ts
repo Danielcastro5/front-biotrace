@@ -520,22 +520,8 @@ export class MpIngresoFormatoComponent implements OnInit {
       observaciones: this.formMp.observaciones
     };
 
-    // Actualiza store reactivo local de inmediato
-    this.data.addIngresoMp(nuevoIngreso);
-
-    try {
-      if (material) {
-        await firstValueFrom(this.api.create('ingresos-mp', {
-          materia_prima_id: material.id,
-          lote_interno: this.formMp.loteInterno,
-          lote_proveedor: this.formMp.loteProveedor,
-          cantidad_recibida: cant,
-          proveedor: this.formMp.proveedor
-        }));
-      }
-    } catch {
-      // Modo local reactivo en caso de que API offline
-    }
+    // Actualiza store reactivo local y persiste en base de datos PostgreSQL
+    await this.data.addIngresoMp(nuevoIngreso);
 
     this.feedbackMessage.set('Lote de materia prima registrado exitosamente.');
     setTimeout(() => {
