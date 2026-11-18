@@ -37,7 +37,14 @@ interface TraceChain {
           </div>
         </div>
 
-        <button type="button" class="btn btn-secondary" (click)="imprimirReporte()">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="imprimirReporte()"
+          [disabled]="!activeChain()"
+          [style.opacity]="!activeChain() ? '0.5' : '1'"
+          [style.cursor]="!activeChain() ? 'not-allowed' : 'pointer'"
+        >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 6 2 18 2 18 9"></polyline>
             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
@@ -67,6 +74,18 @@ interface TraceChain {
                 [(ngModel)]="searchCode"
                 (keyup.enter)="ejecutarRastreo()"
               />
+              <button
+                *ngIf="searchCode"
+                type="button"
+                (click)="limpiarBusqueda()"
+                style="background: transparent; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; padding: 0 6px; margin-right: 4px;"
+                title="Limpiar búsqueda"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
             <button type="button" class="btn btn-primary" (click)="ejecutarRastreo()">
               Rastrear 360°
@@ -384,8 +403,24 @@ interface TraceChain {
         </div>
       </div>
 
-      <!-- ESTADO VACÍO SI NO SE ENCUENTRA -->
-      <div *ngIf="!activeChain()" class="table-card" style="padding: 3rem; text-align: center;">
+      <!-- ESTADO INICIAL LIMPIO -->
+      <div *ngIf="!activeChain() && !hasSearched()" class="table-card" style="padding: 3.5rem 2rem; text-align: center;">
+        <div style="width: 52px; height: 52px; margin: 0 auto 1rem; border-radius: 50%; background: #faf5ff; border: 1px solid #e9d5ff; display: flex; align-items: center; justify-content: center; color: #7e22ce;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">
+          Consulta de Trazabilidad 360°
+        </h3>
+        <p style="font-size: 0.875rem; color: #64748b; margin: 0 auto; max-width: 480px; line-height: 1.5;">
+          Ingresa un número de pedido o lote en el buscador superior, o pulsa un botón de rastreo rápido para iniciar la consulta.
+        </p>
+      </div>
+
+      <!-- ESTADO NO ENCONTRADO TRAS BÚSQUEDA -->
+      <div *ngIf="!activeChain() && hasSearched()" class="table-card" style="padding: 3rem; text-align: center;">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" style="margin-bottom: 0.75rem;">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -552,16 +587,19 @@ export class Trazabilidad360Component implements OnInit {
   private route = inject(ActivatedRoute);
 
   searchCode = '';
+  hasSearched = signal<boolean>(false);
   activeChain = signal<TraceChain | null>(null);
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       if (params['q']) {
         this.searchCode = params['q'];
-      } else if (this.data.pedidos().length > 0) {
-        this.searchCode = this.data.pedidos()[0].numeroPedido;
+        this.ejecutarRastreo();
+      } else {
+        this.searchCode = '';
+        this.activeChain.set(null);
+        this.hasSearched.set(false);
       }
-      this.ejecutarRastreo();
     });
   }
 
@@ -570,12 +608,21 @@ export class Trazabilidad360Component implements OnInit {
     this.ejecutarRastreo();
   }
 
+  limpiarBusqueda() {
+    this.searchCode = '';
+    this.activeChain.set(null);
+    this.hasSearched.set(false);
+  }
+
   ejecutarRastreo() {
     const code = this.searchCode.trim().toLowerCase();
     if (!code) {
       this.activeChain.set(null);
+      this.hasSearched.set(false);
       return;
     }
+
+    this.hasSearched.set(true);
 
     // Buscar el pedido por número o por lote asignado
     const ped = this.data.pedidos().find(p =>
@@ -633,6 +680,7 @@ export class Trazabilidad360Component implements OnInit {
   }
 
   imprimirReporte() {
+    if (!this.activeChain()) return;
     window.print();
   }
 }
