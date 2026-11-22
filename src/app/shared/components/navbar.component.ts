@@ -109,6 +109,15 @@ interface PageItem {
 
       <!-- DERECHA: PILL DE USUARIO Y BOTÓN DE TUERCA (SETTINGS) -->
       <div class="navbar-right">
+        <!-- Botón Guía Interactiva -->
+        <button
+          type="button"
+          class="btn btn-secondary guide-btn"
+          (click)="iniciarTourGuiado()"
+        >
+          Guía Interactiva
+        </button>
+
         <!-- Perfil de Usuario Logueado -->
         <div class="user-badge" *ngIf="auth.currentUser() as user">
           <div class="avatar">{{ user.name ? user.name.slice(0, 2).toUpperCase() : 'US' }}</div>
@@ -636,6 +645,11 @@ interface PageItem {
       color: #64748b;
       font-weight: 600;
     }
+    .guide-btn {
+      padding: 0.45rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
 
     /* BOTÓN TUERCA & DROPDOWN */
     .settings-menu-container {
@@ -1112,5 +1126,9 @@ export class NavbarComponent {
   logout() {
     this.isGearOpen.set(false);
     this.auth.logout();
+  }
+
+  iniciarTourGuiado() {
+    console.log('Guia lista para configurar');
   }
 }
