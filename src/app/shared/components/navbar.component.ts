@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { UiStateService } from '../../core/services/ui-state.service';
+import { TourService } from '../../core/services/tour.service';
 
 interface PageItem {
   title: string;
@@ -109,6 +110,15 @@ interface PageItem {
 
       <!-- DERECHA: PILL DE USUARIO Y BOTÓN DE TUERCA (SETTINGS) -->
       <div class="navbar-right">
+        <!-- Botón Guía Interactiva -->
+        <button
+          type="button"
+          class="btn btn-secondary guide-btn"
+          (click)="iniciarTourGuiado()"
+        >
+          Guía Interactiva
+        </button>
+
         <!-- Perfil de Usuario Logueado -->
         <div class="user-badge" *ngIf="auth.currentUser() as user">
           <div class="avatar">{{ user.name ? user.name.slice(0, 2).toUpperCase() : 'US' }}</div>
@@ -636,6 +646,27 @@ interface PageItem {
       color: #64748b;
       font-weight: 600;
     }
+    .guide-btn,
+    .btn.guide-btn {
+      padding: 0.45rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background-color: #0E1525;
+      color: #FFFFFF;
+      border: 1px solid var(--titanium-800, #1E293B);
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .guide-btn:hover,
+    .btn.guide-btn:hover {
+      background-color: #19243C;
+      border-color: var(--cyan-vibrant, #06B6D4);
+      color: #FFFFFF;
+    }
+    .guide-btn:focus-visible,
+    .btn.guide-btn:focus-visible {
+      outline: 2px solid var(--cyan-vibrant, #06B6D4);
+      outline-offset: 2px;
+    }
 
     /* BOTÓN TUERCA & DROPDOWN */
     .settings-menu-container {
@@ -972,6 +1003,7 @@ interface PageItem {
 export class NavbarComponent {
   auth = inject(AuthService);
   ui = inject(UiStateService);
+  private tourService = inject(TourService);
   private router = inject(Router);
 
   // Estados interactivos
@@ -1112,5 +1144,9 @@ export class NavbarComponent {
   logout() {
     this.isGearOpen.set(false);
     this.auth.logout();
+  }
+
+  iniciarTourGuiado() {
+    this.tourService.iniciarGuiaPrincipal();
   }
 }
